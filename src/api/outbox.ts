@@ -1,18 +1,51 @@
 import type { MatchSubmission } from '../contracts/match.ts'
+import { postMatch } from './endpoints.ts'
+import { createOutbox, type SubmissionView } from './outboxCore.ts'
+import { queryClient } from './queryClient.ts'
+import { invalidateMatchQueries } from './queries.ts'
 
-// STUB: owned by the network work. Non-hook API, callable from the game end handler.
+/**
+ * App-wide outbox: real HTTP (Axios, so MSW in dev/test/demo) + TanStack Query invalidation.
+ * The state machine and persistence live in `outboxCore.ts`.
+ */
+const outbox = createOutbox({
+  send: (submission, signal) => postMatch(submission, signal),
+  // A confirmed match changes both lists: refresh Ranking and Match History.
+  onSynced: () => {
+    void invalidateMatchQueries(queryClient)
+  },
+})
 
 /** Queues a finished match (persisted) and starts sending it. Idempotent per matchId. Never throws. */
-export function enqueueMatch(_submission: MatchSubmission): void {
-  throw new Error('Not implemented')
+export function enqueueMatch(submission: MatchSubmission): void {
+  outbox.enqueue(submission)
 }
 
 /** Manual retry of a queued match. */
-export function retryMatch(_matchId: string): void {
-  throw new Error('Not implemented')
+export function retryMatch(matchId: string): void {
+  outbox.retry(matchId)
 }
 
 /** Sends everything left in the persisted outbox (call once on app start and when back online). */
 export function flushPending(): void {
-  throw new Error('Not implemented')
+  void outbox.flush()
+}
+
+/** Same as `flushPending` but resolves when every attempt has settled (tests, tooling). */
+export function flushPendingAndWait(): Promise<void> {
+  return outbox.flush()
+}
+
+/** `useSyncExternalStore` plumbing for `useMatchSubmission`. */
+export function subscribeOutbox(listener: () => void): () => void {
+  return outbox.subscribe(listener)
+}
+
+export function getSubmissionView(matchId: string | null): SubmissionView | null {
+  return outbox.getSnapshot(matchId)
+}
+
+/** Drops every queued and remembered submission (part of `resetMocks`). */
+export function resetOutbox(): void {
+  outbox.reset()
 }

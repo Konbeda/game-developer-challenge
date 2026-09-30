@@ -94,6 +94,9 @@ export class GameScene {
       width: arena.width,
       height: arena.height,
     })
+    // Larger, calmer waves than the raw 64px tile, closer to the reference scene.
+    this.water.tileScale.set(1.6)
+    this.water.tint = 0xdaf1ff
     this.effects = new EffectSystem(textures)
     this.root.addChild(
       this.water,
@@ -223,7 +226,7 @@ export class GameScene {
   /** Advances visual-only animation (water, flashes, effects, shake) by simulated time. */
   update(dtMs: number): void {
     this.timeMs += dtMs
-    this.water.tilePosition.set(this.timeMs * 0.006, this.timeMs * 0.003)
+    this.water.tilePosition.set(this.timeMs * 0.005, this.timeMs * 0.0025)
     this.effects.update(dtMs)
 
     const animate = (view: ShipView) => {
@@ -298,7 +301,7 @@ export class GameScene {
     const barRoot = new Container()
     const frame = new Sprite(this.textures.get('enemy_health_frame'))
     const fill = new Sprite(this.fillTexture(barColor, 1))
-    barRoot.addChild(fill, frame)
+    barRoot.addChild(frame, fill)
     barRoot.pivot.set(HEALTH_BAR.width / 2, HEALTH_BAR.height / 2)
     barRoot.scale.set(BAR_SCALE)
     this.barLayer.addChild(barRoot)

@@ -1,0 +1,77 @@
+{
+  "generatedAt": "2026-09-30T05:11:55.196Z",
+  "config": {
+    "browser": "chrome",
+    "browserVersion": "154.0.8037.92",
+    "headless": true,
+    "categories": [
+      "devtools.timeline",
+      "disabled-by-default-devtools.timeline",
+      "v8",
+      "v8.gc",
+      "gpu",
+      "toplevel"
+    ],
+    "tracedSeconds": 26.4,
+    "productionBuild": true
+  },
+  "threadsSeen": [
+    "swapper",
+    "CrRendererMain",
+    "PerfettoTrace",
+    "Chrome_ChildIOThread",
+    "Chrome_IOThread",
+    "CrBrowserMain",
+    "ServiceWorker thread",
+    "GpuVSyncThread",
+    "CrGpuMain",
+    "VizCompositorThread",
+    "Compositor",
+    "DevToolsPipeHandlerWriteThread",
+    "CompositorTileWorker1",
+    "ThreadPoolForegroundWorker",
+    "ThreadPoolSingleThreadSharedForeground",
+    "DedicatedWorker thread",
+    "CacheThread_BlockFile",
+    "ThreadPoolServiceThread",
+    "ThreadPoolSingleThreadForegroundBlocking",
+    "MemoryInfra",
+    "ThreadPoolBackgroundWorker",
+    "ThreadPoolSingleThreadCOMSTASharedBackgroundBlocking",
+    "ThreadPoolSingleThreadSharedBackgroundBlocking",
+    "ThreadPoolSingleThreadCOMSTASharedForegroundBlocking"
+  ],
+  "rendererMainThread": {
+    "busyPctOfWindow": 8.7,
+    "count": 24103,
+    "totalMs": 2308.6,
+    "maxMs": 126.54,
+    "over16msCount": 1,
+    "over50msCount": 1
+  },
+  "gpuThread": {
+    "busyPctOfWindow": 85.6,
+    "count": 22410,
+    "totalMs": 22592.2,
+    "maxMs": 14.07,
+    "over16msCount": 0,
+    "over50msCount": 0
+  },
+  "gc": {
+    "minor": {
+      "count": 120,
+      "totalMs": 38.6,
+      "maxMs": 1.79,
+      "over16msCount": 0,
+      "over50msCount": 0
+    },
+    "major": {
+      "count": 3,
+      "totalMs": 7.6,
+      "maxMs": 2.65,
+      "over16msCount": 0,
+      "over50msCount": 0
+    }
+  },
+  "note": "Only aggregates are stored; the raw trace is several tens of MB."
+}

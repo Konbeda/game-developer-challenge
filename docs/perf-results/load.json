@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-09-30T05:11:26.866Z",
+  "config": {
+    "browser": "chrome",
+    "browserVersion": "154.0.8037.92",
+    "headless": true,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "cache": "empty (fresh browser context)",
+    "latencyMs": 0,
+    "productionBuild": true
+  },
+  "renderer": {
+    "webgl": {
+      "vendor": "Google Inc. (NVIDIA)",
+      "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 (0x00002484) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+      "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+    },
+    "gpu": {
+      "glImplementation": "(gl=egl-angle,angle=d3d11)",
+      "devices": [
+        "NVIDIA GeForce RTX 3070 (driver 32.0.16.1714)",
+        "Microsoft Basic Render Driver (driver 10.0.26100.9278)"
+      ],
+      "webgl": "enabled",
+      "gpuCompositing": "enabled",
+      "rasterization": "enabled_force"
+    }
+  },
+  "menu": {
+    "visibleFromNavigationStartWallMs": 366,
+    "domContentLoadedMs": 156,
+    "loadEventMs": 226,
+    "paints": {
+      "first-paint": 224,
+      "first-contentful-paint": 348
+    },
+    "resourceCount": 59,
+    "resourcesByType": {
+      "script": {
+        "count": 2,
+        "transferKB": 376
+      },
+      "other": {
+        "count": 10,
+        "transferKB": 95
+      },
+      "link": {
+        "count": 1,
+        "transferKB": 7
+      },
+      "img": {
+        "count": 37,
+        "transferKB": 1100
+      },
+      "css": {
+        "count": 9,
+        "transferKB": 0
+      }
+    }
+  },
+  "combatAssets": {
+    "note": "click on Play -> match running (includes loading every combat texture, creating the canvas and starting the simulation)",
+    "coldMs": 300.9,
+    "warmMs": 58.1
+  }
+}

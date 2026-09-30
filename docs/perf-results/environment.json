@@ -1,0 +1,196 @@
+{
+  "generatedAt": "2026-09-30T05:11:22.263Z",
+  "git": {
+    "commit": "2773e2455da74211343b8c782b3ac99d787d3072",
+    "branch": "main"
+  },
+  "machine": {
+    "platform": "Windows_NT 10.0.26200",
+    "arch": "x64",
+    "node": "v24.19.0",
+    "totalMemoryGiB": 15.8,
+    "cpuModelNode": "12th Gen Intel(R) Core(TM) i7-12700F",
+    "logicalCpus": 20,
+    "cpu": {
+      "name": "12th Gen Intel(R) Core(TM) i7-12700F",
+      "cores": 12,
+      "logicalProcessors": 20,
+      "baseMHz": 2100
+    },
+    "gpus": [
+      {
+        "name": "NVIDIA GeForce RTX 3070",
+        "driver": "32.0.16.1714",
+        "resolution": "1920x1080",
+        "refreshHz": 180
+      }
+    ],
+    "system": {
+      "Manufacturer": "Micro-Star International Co., Ltd.",
+      "Model": "MS-7E02",
+      "TotalPhysicalMemory": 16948150272
+    },
+    "os": {
+      "Caption": "Microsoft Windows 11 Pro",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200"
+    },
+    "memoryModules": [
+      {
+        "gib": 16,
+        "mtPerSec": 4800
+      }
+    ]
+  },
+  "build": {
+    "jsFiles": 14,
+    "jsBytes": 1487806,
+    "jsGzipBytes": 483428,
+    "cssBytes": 29432,
+    "cssGzipBytes": 7329,
+    "indexHtmlBytes": 1435,
+    "largestJs": [
+      {
+        "file": "bundle/index-B39tyhpX.js",
+        "bytes": 765601,
+        "gzipBytes": 232508
+      },
+      {
+        "file": "bundle/browser-D0ByEfKq.js",
+        "bytes": 394814,
+        "gzipBytes": 151914
+      },
+      {
+        "file": "bundle/CanvasPool-D3Nl5vV-.js",
+        "bytes": 68494,
+        "gzipBytes": 22212
+      }
+    ],
+    "modulePreloads": 9,
+    "assetsFolderBytes": 30061871,
+    "assetsPngDefaultBytes": 1576082,
+    "assetsSoundsBytes": 5974092,
+    "files": [
+      {
+        "file": "bundle/browser-D0ByEfKq.js",
+        "bytes": 394814,
+        "gzipBytes": 151914
+      },
+      {
+        "file": "bundle/browserAll-BXfW8yXq.js",
+        "bytes": 42676,
+        "gzipBytes": 11106
+      },
+      {
+        "file": "bundle/BufferResource-BgxOg2Wd.js",
+        "bytes": 11068,
+        "gzipBytes": 2848
+      },
+      {
+        "file": "bundle/Cache-B5xqrpal.js",
+        "bytes": 1100,
+        "gzipBytes": 558
+      },
+      {
+        "file": "bundle/CanvasPool-D3Nl5vV-.js",
+        "bytes": 68494,
+        "gzipBytes": 22212
+      },
+      {
+        "file": "bundle/canvasUtils-CDqbpGef.js",
+        "bytes": 6054,
+        "gzipBytes": 2039
+      },
+      {
+        "file": "bundle/Filter-1bfjrPnq.js",
+        "bytes": 42012,
+        "gzipBytes": 11966
+      },
+      {
+        "file": "bundle/fredoka-latin-600-normal-C4zohCW5.woff2",
+        "bytes": 16468,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/fredoka-latin-600-normal-CcrEjrB4.woff",
+        "bytes": 20380,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/GCManagedHash-C-1BOReu.js",
+        "bytes": 19356,
+        "gzipBytes": 6271
+      },
+      {
+        "file": "bundle/getTextureBatchBindGroup-BfJg7YTO.js",
+        "bytes": 344,
+        "gzipBytes": 269
+      },
+      {
+        "file": "bundle/GraphicsContext-C110Pk_4.js",
+        "bytes": 61700,
+        "gzipBytes": 20471
+      },
+      {
+        "file": "bundle/index-1Jhskdib.css",
+        "bytes": 29432,
+        "gzipBytes": 7329
+      },
+      {
+        "file": "bundle/index-B39tyhpX.js",
+        "bytes": 765601,
+        "gzipBytes": 232508
+      },
+      {
+        "file": "bundle/init-oaFywnlA.js",
+        "bytes": 15753,
+        "gzipBytes": 4901
+      },
+      {
+        "file": "bundle/nunito-sans-latin-400-normal-AkRraKH2.woff2",
+        "bytes": 13892,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/nunito-sans-latin-400-normal-DY9yCUyQ.woff",
+        "bytes": 17512,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/nunito-sans-latin-600-normal-BtVRvDNj.woff2",
+        "bytes": 14008,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/nunito-sans-latin-600-normal-DLks-Kj1.woff",
+        "bytes": 17644,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/nunito-sans-latin-700-normal-CICRJDmU.woff2",
+        "bytes": 13836,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/nunito-sans-latin-700-normal-CLVG92B9.woff",
+        "bytes": 17408,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/RenderTargetSystem-BixfN62s.js",
+        "bytes": 58779,
+        "gzipBytes": 16302
+      },
+      {
+        "file": "bundle/ship_2-DuA2Qm8G.png",
+        "bytes": 11494,
+        "gzipBytes": null
+      },
+      {
+        "file": "bundle/webworkerAll-BUSlDUCt.js",
+        "bytes": 55,
+        "gzipBytes": 63
+      }
+    ]
+  }
+}

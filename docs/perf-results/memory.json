@@ -1,0 +1,211 @@
+{
+  "generatedAt": "2026-09-30T05:34:31.270Z",
+  "config": {
+    "browser": "chrome",
+    "browserVersion": "154.0.8037.92",
+    "headless": true,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "cycles": 5,
+    "cycleSeconds": 20,
+    "match": "default options (90 s session, 3 s spawn interval)",
+    "bot": "hold W + Space + Q + E, alternate D/A every 3 s, real-time keyboard events",
+    "productionBuild": true
+  },
+  "summary": {
+    "cyclesMeasured": 5,
+    "jsHeapMB": {
+      "first": 7.98,
+      "last": 8.69,
+      "delta": 0.71,
+      "slopePerCycle": 0.178
+    },
+    "domNodes": {
+      "first": 124,
+      "last": 124,
+      "delta": 0,
+      "slopePerCycle": 0
+    },
+    "jsEventListeners": {
+      "first": 427,
+      "last": 426,
+      "delta": -1,
+      "slopePerCycle": -0.2
+    },
+    "windowListeners": {
+      "first": 6,
+      "last": 6,
+      "delta": 0,
+      "slopePerCycle": 0
+    },
+    "documentListeners": {
+      "first": 1,
+      "last": 1,
+      "delta": 0,
+      "slopePerCycle": 0
+    },
+    "canvasesAtMenu": [0, 0, 0, 0, 0],
+    "webglContexts": {
+      "createdPerCycle": [3, 4, 5, 6, 7],
+      "alivePerCycle": [1, 1, 1, 1, 1]
+    },
+    "audioContexts": {
+      "createdPerCycle": [1, 1, 1, 1, 1],
+      "alivePerCycle": [1, 1, 1, 1, 1]
+    },
+    "rendererPrivateMB": {
+      "first": 220.1,
+      "last": 210.1,
+      "delta": -10,
+      "slopePerCycle": -3.21
+    },
+    "gpuProcessPrivateMB": {
+      "first": 186,
+      "last": 192.1,
+      "delta": 6.1,
+      "slopePerCycle": 1.17
+    }
+  },
+  "verdict": "no continuous growth detected",
+  "rows": [
+    {
+      "cycle": 0,
+      "phase": "fresh menu",
+      "jsHeapMB": 5.32,
+      "jsHeapTotalMB": 6.34,
+      "nodes": 226,
+      "jsEventListeners": 393,
+      "canvases": 0,
+      "domNodes": 122,
+      "glCreated": 0,
+      "glAlive": 0,
+      "audioContexts": 0,
+      "audioContextsAlive": 0,
+      "audioSources": 0,
+      "audioSourcesEnded": 0,
+      "windowListeners": 6,
+      "documentListeners": 1,
+      "rendererWorkingSetMB": 120,
+      "rendererPrivateMB": 64.3,
+      "gpuProcessWorkingSetMB": 106.1,
+      "gpuProcessPrivateMB": 146
+    },
+    {
+      "cycle": 1,
+      "endedBy": "play_time",
+      "playedSeconds": 20.015,
+      "jsHeapMB": 7.98,
+      "jsHeapTotalMB": 8.84,
+      "nodes": 284,
+      "jsEventListeners": 427,
+      "canvases": 0,
+      "domNodes": 124,
+      "glCreated": 3,
+      "glAlive": 1,
+      "audioContexts": 1,
+      "audioContextsAlive": 1,
+      "audioSources": 102,
+      "audioSourcesEnded": 102,
+      "windowListeners": 6,
+      "documentListeners": 1,
+      "rendererWorkingSetMB": 253,
+      "rendererPrivateMB": 220.1,
+      "gpuProcessWorkingSetMB": 111.6,
+      "gpuProcessPrivateMB": 186
+    },
+    {
+      "cycle": 2,
+      "endedBy": "play_time",
+      "playedSeconds": 20.004,
+      "jsHeapMB": 8.21,
+      "jsHeapTotalMB": 8.84,
+      "nodes": 284,
+      "jsEventListeners": 425,
+      "canvases": 0,
+      "domNodes": 124,
+      "glCreated": 4,
+      "glAlive": 1,
+      "audioContexts": 1,
+      "audioContextsAlive": 1,
+      "audioSources": 210,
+      "audioSourcesEnded": 210,
+      "windowListeners": 6,
+      "documentListeners": 1,
+      "rendererWorkingSetMB": 253.6,
+      "rendererPrivateMB": 223,
+      "gpuProcessWorkingSetMB": 108.1,
+      "gpuProcessPrivateMB": 189.4
+    },
+    {
+      "cycle": 3,
+      "endedBy": "play_time",
+      "playedSeconds": 20.104,
+      "jsHeapMB": 8.41,
+      "jsHeapTotalMB": 9.34,
+      "nodes": 284,
+      "jsEventListeners": 425,
+      "canvases": 0,
+      "domNodes": 124,
+      "glCreated": 5,
+      "glAlive": 1,
+      "audioContexts": 1,
+      "audioContextsAlive": 1,
+      "audioSources": 315,
+      "audioSourcesEnded": 315,
+      "windowListeners": 6,
+      "documentListeners": 1,
+      "rendererWorkingSetMB": 243.3,
+      "rendererPrivateMB": 214.2,
+      "gpuProcessWorkingSetMB": 109.7,
+      "gpuProcessPrivateMB": 191
+    },
+    {
+      "cycle": 4,
+      "endedBy": "play_time",
+      "playedSeconds": 20.111,
+      "jsHeapMB": 8.57,
+      "jsHeapTotalMB": 9.59,
+      "nodes": 284,
+      "jsEventListeners": 425,
+      "canvases": 0,
+      "domNodes": 124,
+      "glCreated": 6,
+      "glAlive": 1,
+      "audioContexts": 1,
+      "audioContextsAlive": 1,
+      "audioSources": 425,
+      "audioSourcesEnded": 425,
+      "windowListeners": 6,
+      "documentListeners": 1,
+      "rendererWorkingSetMB": 240.6,
+      "rendererPrivateMB": 210.9,
+      "gpuProcessWorkingSetMB": 109.9,
+      "gpuProcessPrivateMB": 188.9
+    },
+    {
+      "cycle": 5,
+      "endedBy": "play_time",
+      "playedSeconds": 20.03,
+      "jsHeapMB": 8.69,
+      "jsHeapTotalMB": 9.59,
+      "nodes": 284,
+      "jsEventListeners": 426,
+      "canvases": 0,
+      "domNodes": 124,
+      "glCreated": 7,
+      "glAlive": 1,
+      "audioContexts": 1,
+      "audioContextsAlive": 1,
+      "audioSources": 527,
+      "audioSourcesEnded": 527,
+      "windowListeners": 6,
+      "documentListeners": 1,
+      "rendererWorkingSetMB": 240.3,
+      "rendererPrivateMB": 210.1,
+      "gpuProcessWorkingSetMB": 109,
+      "gpuProcessPrivateMB": 192.1
+    }
+  ]
+}

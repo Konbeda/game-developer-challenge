@@ -123,10 +123,9 @@ test.describe('Shell lifetimes', () => {
   }) => {
     await app.open({ seed: 5, config: QUIET })
     await startMatch(page)
-    await page.keyboard.down(KEYS.north)
-    await advance(page, 1_000)
-    await page.keyboard.up(KEYS.north)
-    await advance(page, 800) // coast to a stop, nose pointing north
+    await page.keyboard.down(KEYS.left)
+    await advance(page, Math.ceil((Math.PI / 2 / player.turnRate) * 1000))
+    await page.keyboard.up(KEYS.left)
     await tap(page, KEYS.front) // north, a free lane
     const samples = await sample(page, 2_500, FIXED_STEP_MS)
     const seen = samples.flatMap(playerShots)
@@ -184,17 +183,15 @@ test.describe('Damage and scoring', () => {
           }
         }
         if (target) {
-          // Sail towards the target with W/A/S/D (8 directions) and fire the front cannon when lined up.
-          const toTarget = Math.atan2(target.y - snap.player.y, target.x - snap.player.x)
-          const ax = Math.cos(toTarget)
-          const ay = Math.sin(toTarget)
-          set('KeyD', ax > 0.38)
-          set('KeyA', ax < -0.38)
-          set('KeyS', ay > 0.38)
-          set('KeyW', ay < -0.38)
-          set('ArrowUp', Math.abs(norm(toTarget - snap.player.angle)) < 0.2)
+          // Turn on the spot towards the nearest enemy (A / D) and fire the front cannon when lined up.
+          const diff = norm(
+            Math.atan2(target.y - snap.player.y, target.x - snap.player.x) - snap.player.angle,
+          )
+          set('KeyD', diff > 0.05)
+          set('KeyA', diff < -0.05)
+          set('ArrowUp', Math.abs(diff) < 0.2)
         } else {
-          for (const code of ['KeyD', 'KeyA', 'KeyS', 'KeyW', 'ArrowUp']) set(code, false)
+          for (const code of ['KeyD', 'KeyA', 'ArrowUp']) set(code, false)
         }
         game.advance(1000 / 60) // exactly one simulation step per iteration
         steps += 1

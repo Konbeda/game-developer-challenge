@@ -101,6 +101,12 @@ export function MenuScreen() {
       <div className="absolute bottom-1.5 left-2 rounded-chip bg-[rgba(8,16,30,0.72)]">
         <NetworkScenariosTrigger look="link" />
       </div>
+      <p
+        className="absolute bottom-1.5 left-1/2 -translate-x-1/2 rounded-chip bg-[rgba(8,16,30,0.72)] px-2 py-0.5 text-[0.65rem] text-cream-dim"
+        data-testid="build-id"
+      >
+        Build {__BUILD_ID__}
+      </p>
     </Scene>
   )
 }

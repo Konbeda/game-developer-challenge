@@ -36,7 +36,8 @@ test.describe('Visual regression', () => {
     await app.open({ name: 'Tester' })
     await expect(app.menu.root).toBeVisible()
     await settle(page)
-    await expect(page).toHaveScreenshot('menu.png')
+    // The build label changes with every commit, so it is masked out of the comparison.
+    await expect(page).toHaveScreenshot('menu.png', { mask: [page.getByTestId('build-id')] })
   })
 
   test('arena in a stable state', async ({ app, page }) => {

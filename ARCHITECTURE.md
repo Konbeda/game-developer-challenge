@@ -86,16 +86,21 @@ subscribe / onEnd / destroy`. It never sees frames.
 
 ## Input: keyboard, buttons and stick
 
-The simulation only understands six held booleans (`InputState`). Movement is **direction based** for every
-input method: W/A/S/D (`steerFromKeys` in `src/game/controls.ts`) and the touch stick both produce a
-`SteerTarget` (a screen direction and a push from 0 to 1) and call `host.setSteer`. On every fixed step the
-host turns that, together with the ship's current heading, into forward / turn-left / turn-right
-(`src/game/steering.ts`, pure and unit tested) and ORs it with the held buttons. The arrow keys (Up = front
-cannon, Left/Right = broadsides, `FIRE_BINDINGS`) and the touch weapon buttons set the fire booleans through
-`host.setInput`. The angle convention of a screen vector (`atan2(dy, dx)`, y down) is the simulation's own,
-so no conversion is needed and the simulation itself is unchanged. Below a dead zone (20 %) the stick does
-nothing, from 30 % it sails, and a reversal of more than ~108 degrees turns in place first; keys always mean a
-full push. Steering, like held keys, is dropped on pause, resume, end of match and unmount.
+The simulation only understands six held booleans (`InputState`). There are two movement schemes, one per
+kind of device, and they can be used together:
+
+- **Keyboard (tank style).** W (forward), A / D (rotate) and the arrow keys (Up = front cannon, Left / Right =
+  broadsides) are bound in `KEY_BINDINGS` (`src/game/controls.ts`) and set the booleans through
+  `host.setInput`. The same table feeds the in-game help.
+- **Touch (heading based).** The steering stick calls `host.setSteer` with a screen direction and a push from
+  0 to 1. On every fixed step the host turns that, together with the ship's current heading, into forward /
+  turn-left / turn-right (`src/game/steering.ts`, pure and unit tested) and ORs it with the held booleans.
+  The angle of a screen vector (`atan2(dy, dx)`, y down) is the simulation's own convention, so nothing needs
+  converting. Below a dead zone (20 %) the stick does nothing, from 30 % it sails, and a reversal of more than
+  ~108 degrees turns in place first. The touch weapon buttons use `host.setInput` like the arrow keys.
+
+The simulation itself is unchanged by either. Held keys and steering are dropped on pause, resume, end of
+match and unmount.
 
 ## Resource lifecycle
 

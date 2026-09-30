@@ -88,23 +88,23 @@ Copy `.env.example` to `.env` if you need any of them; all are optional.
 
 ## Controls
 
-| Action                         | Keyboard                          | Touch                |
-| ------------------------------ | --------------------------------- | -------------------- |
-| Steer and sail                 | `W` `A` `S` `D` (screen direction) | Point the stick      |
-| Fire front cannon (1 shot)     | `Up` arrow                        | Crosshair button     |
-| Fire left broadside (3 shots)  | `Left` arrow                      | Left flame button    |
-| Fire right broadside (3 shots) | `Right` arrow                     | Right flame button   |
-| Pause                          | `P` / `Esc`                       | Pause button         |
+| Action                         | Keyboard      | Touch                    |
+| ------------------------------ | ------------- | ------------------------ |
+| Sail forward                   | `W`           | Push the stick           |
+| Turn left / right              | `A` / `D`     | Point the stick to steer |
+| Fire front cannon (1 shot)     | `Up` arrow    | Crosshair button         |
+| Fire left broadside (3 shots)  | `Left` arrow  | Left flame button        |
+| Fire right broadside (3 shots) | `Right` arrow | Right flame button       |
+| Pause                          | `P` / `Esc`   | Pause button             |
 
-Movement is direction based, with no tank-style "forward + rotate": `W`, `A`, `S`, `D` point up, left,
-down and right on the screen (two keys make a diagonal, opposite keys cancel), and the ship turns to that
-heading by itself and sails while a key is held. The touch **steering stick** works the same way: it turns
-the ship to where the thumb points and sails while pushed (a light touch in the centre only steers).
-Movement and firing work at the same time, one hand on `WASD` and one on the arrows, or one thumb on the
-stick and one on the weapon buttons. The touch controls are semi-transparent so the arena stays readable,
-multi-touch capable, and appear on touch devices (or with `?touch=1`). Keys are captured only while a
-match is on screen and no dialog is open. On phones use **landscape**; in portrait a rotate prompt is shown
-and the match pauses.
+On the keyboard movement is tank style: `W` sails forward and `A` / `D` rotate the ship. On touch screens
+the left thumb uses a **steering stick** instead: the ship turns to the direction you point and sails while
+the stick is pushed (a light touch in the centre only steers), and the right thumb uses the weapon buttons.
+Movement and firing work at the same time: one hand on `WASD` keys and one on the arrows, or one thumb on
+the stick and one on the weapon buttons. The touch controls are semi-transparent so the arena stays
+readable, multi-touch capable, and appear on touch devices (or with `?touch=1`). Keys are captured only
+while a match is on screen and no dialog is open. On phones use **landscape**; in portrait a rotate prompt is
+shown and the match pauses.
 
 The match also pauses automatically when the window loses focus or the tab is hidden; resuming needs an
 explicit click on **Resume** and never applies input held during the pause.
@@ -204,6 +204,9 @@ query strings, `localStorage`, request bodies and responses) goes through a stri
 threat model in [ARCHITECTURE.md](ARCHITECTURE.md) for what is and is not prevented.
 
 ## Deployment
+
+The main menu shows a small **Build** label with the short commit of the running version, so you can always
+tell which build you are looking at (useful after a deploy: reload the page if the label is an old commit).
 
 Static build (`pnpm build` -> `dist/`). `vercel.json` rewrites unknown paths to `index.html` and serves
 `/mockServiceWorker.js` as a static file. Reloading any URL works. Deploying to Netlify or Cloudflare

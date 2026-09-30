@@ -10,3 +10,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/** Short commit hash of the running build (set in vite.config.ts). */
+declare const __BUILD_ID__: string

@@ -36,7 +36,7 @@ Production answer (documented, not built): server-side replay of the determinist
 - [x] oxlint, Prettier, scripts: `dev` `build` `preview` `lint` `typecheck` `test` `e2e` (Playwright config still pending, Phase 5)
 - [x] Sentry wired with optional DSN, `.env.example`
 - [x] CI workflow written (lint, typecheck, unit, build, e2e); first run pending push
-- [ ] First deploy (empty page) incl. SPA fallback and MSW service worker in production
+- [x] Deployed on Vercel with SPA fallback and the MSW service worker in production
 
 - [x] Validation layer `src/lib/validation`: Zod schemas shared by app, MSW and tests; hostile-input unit tests; lint rule banning `dangerouslySetInnerHTML`
 - [x] Player name modal (first visit, 1-16 chars, no login, local `playerId`)
@@ -94,4 +94,4 @@ Production answer (documented, not built): server-side replay of the determinist
 
 - [x] Balancing notes, final profiling report
 - [x] `README.md` and `ARCHITECTURE.md` (English)
-- [ ] Final deploy, clean-checkout verification
+- [x] Final deploy and clean-checkout verification (published site smoke-tested: menu, MSW ranking, deep-path reload, a real match, empty console)

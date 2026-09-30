@@ -4,7 +4,7 @@ A 2D top-down naval shooter built with **React**, **TypeScript (strict)** and **
 islands, sink Chasers and Shooters, and climb a ranking that is served by a fully mocked REST API
 (**MSW** + **Axios** + **TanStack Query**).
 
-- **Live demo:** _set after the first deploy_ (Vercel)
+- **Live demo:** https://game-developer-challenge-pj2i.vercel.app (Vercel; the ranking and history run on MSW in the browser)
 - **Architecture notes:** [ARCHITECTURE.md](ARCHITECTURE.md)
 - **Performance report:** [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
 - **Development plan / status:** [PLAN.md](PLAN.md)

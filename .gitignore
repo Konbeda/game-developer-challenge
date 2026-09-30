@@ -14,3 +14,11 @@ dist/
 
 # Logs
 *.log
+
+# Tooling
+.vscode/*
+!.vscode/extensions.json
+*.local
+dist-ssr/
+test-results/
+playwright-report/

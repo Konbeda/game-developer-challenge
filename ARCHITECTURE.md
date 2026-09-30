@@ -98,6 +98,11 @@ Builds made with `VITE_E2E=true` expose `window.__game` (`getSnapshot`, `getHud`
 for real; the hook only observes state and drives the clock. `?perf=1` (or the E2E build) enables the
 frame-time sampler behind `window.__perf`.
 
+With the manual clock, `advance()` never draws synchronously: it queues one `requestAnimationFrame` draw, so a test
+that advances thousands of times costs one frame per display frame rather than one per call. This is what
+keeps the suite fast on software WebGL (CI runners without a GPU): the full E2E run takes about 2 minutes
+locally and about 5 minutes on GitHub Actions.
+
 ## Local persistence
 
 Everything persisted lives in `localStorage` under one namespace (`STORAGE_KEYS` in `src/lib/storage.ts`)

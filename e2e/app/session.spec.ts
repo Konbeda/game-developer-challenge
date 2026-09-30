@@ -148,6 +148,35 @@ test.describe('Touch controls', () => {
     await expect(app.game.touchControls).toBeVisible()
   })
 
+  test('the HUD is smaller and see-through with touch controls, to leave the arena clear', async ({
+    app,
+    page,
+  }) => {
+    await app.open({ touch: true })
+    await startMatch(page)
+    const opacity = (id: string) =>
+      page.getByTestId(id).evaluate((el) => Number(getComputedStyle(el).opacity))
+    expect(await opacity('hud-health')).toBeCloseTo(0.6, 2)
+    expect(await opacity('hud-score-panel')).toBeCloseTo(0.6, 2)
+    // The buttons stay easier to see than the read-only panels, and still work.
+    expect(await opacity('hud-pause')).toBeGreaterThan(0.7)
+    await expect(page.getByTestId('hud-pause')).toBeEnabled()
+  })
+
+  test('the HUD is solid and full size with a mouse', async ({ app, page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'the mobile project always has touch')
+    await app.open()
+    await startMatch(page)
+    const score = page.getByTestId('hud-score-panel')
+    expect(await score.evaluate((el) => Number(getComputedStyle(el).opacity))).toBe(1)
+    const solidWidth = (await score.boundingBox())!.width
+
+    await app.open({ touch: true })
+    await startMatch(page)
+    const touchWidth = (await page.getByTestId('hud-score-panel').boundingBox())!.width
+    expect(touchWidth).toBeLessThan(solidWidth * 0.9)
+  })
+
   test('multi-touch: stick + front cannon at the same time, and release stops them', async ({
     app,
     page,

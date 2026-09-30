@@ -480,8 +480,22 @@ input {
   container-type: size;
   overflow: hidden;
   /* One HUD unit = 1px on a 900px wide stage, clamped for tiny and huge screens. */
-  --hud: clamp(0.6px, 0.1111cqw, 1.5px);
+  --hud: calc(clamp(0.6px, 0.1111cqw, 1.5px) * var(--hud-scale, 1));
   background: #2d7fa0 var(--skin-scene, none) center / cover no-repeat;
+}
+
+/* Touch screens: a smaller, see-through HUD leaves more of the arena visible. */
+.game-viewport[data-touch='true'] .game-stage {
+  --hud-scale: 0.78;
+}
+
+.game-viewport[data-touch='true'] .hud-health,
+.game-viewport[data-touch='true'] .hud-counter {
+  opacity: 0.6;
+}
+
+.game-viewport[data-touch='true'] .hud-interactive {
+  opacity: 0.78;
 }
 
 .game-canvas-host {

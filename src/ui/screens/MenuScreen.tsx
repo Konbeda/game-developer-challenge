@@ -7,11 +7,17 @@ import { useMediaQuery } from '../lib/media.ts'
 import { END_REASON_LABELS, formatDuration, formatPlayed } from '../lib/format.ts'
 import { Button, LinkButton, Panel, Scene, ScreenTitle } from '../primitives/index.ts'
 import { skinEmblemUrl, skinTitleUrl } from '../skin.ts'
+import { enterGameFullscreen } from '../lib/fullscreen.ts'
 import { NetworkScenariosTrigger } from './NetworkScenarios.tsx'
 import { SyncStatus } from './SyncStatus.tsx'
 
 export function MenuScreen() {
   const startMatch = useAppStore((s) => s.startMatch)
+  // Fullscreen needs the user's tap, so it is requested here, straight from the click.
+  const play = () => {
+    enterGameFullscreen()
+    startMatch()
+  }
   const go = useAppStore((s) => s.go)
   const openLog = useAppStore((s) => s.openLog)
   // Short landscape phones: the captain card moves under the buttons so the right column fits.
@@ -41,7 +47,7 @@ export function MenuScreen() {
                 </p>
                 <Button
                   size="lg"
-                  onClick={startMatch}
+                  onClick={play}
                   data-testid="menu-play"
                   className="w-full max-w-[16rem]"
                 >
@@ -102,7 +108,7 @@ export function MenuScreen() {
         <NetworkScenariosTrigger look="link" />
       </div>
       <p
-        className="absolute bottom-1.5 left-1/2 -translate-x-1/2 rounded-chip bg-[rgba(8,16,30,0.72)] px-2 py-0.5 text-[0.65rem] text-cream-dim"
+        className="absolute bottom-1.5 left-1/2 min-w-[6.5rem] -translate-x-1/2 rounded-chip bg-[rgba(8,16,30,0.72)] px-2 py-0.5 text-center text-[0.65rem] text-cream-dim tabular-nums"
         data-testid="build-id"
       >
         Build {__BUILD_ID__}

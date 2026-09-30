@@ -2,11 +2,16 @@ import { useAppStore } from '../../state/appStore.ts'
 import { useLastResultStore } from '../../state/lastResultStore.ts'
 import { END_REASON_LABELS, formatDuration } from '../lib/format.ts'
 import { Button, Panel, Scene, ScreenTitle } from '../primitives/index.ts'
+import { enterGameFullscreen } from '../lib/fullscreen.ts'
 import { SyncStatus } from './SyncStatus.tsx'
 
 /** Shown right after a match ends. Play Again always uses the options that are current now. */
 export function ResultScreen() {
   const startMatch = useAppStore((s) => s.startMatch)
+  const playAgain = () => {
+    enterGameFullscreen()
+    startMatch()
+  }
   const go = useAppStore((s) => s.go)
   const submission = useLastResultStore((s) => s.submission)
   const unrecorded = useLastResultStore((s) => s.unrecorded)
@@ -65,7 +70,7 @@ export function ResultScreen() {
           )}
 
           <div className="flex flex-col items-center gap-2 short:flex-row short:gap-3">
-            <Button onClick={startMatch} data-testid="result-play-again">
+            <Button onClick={playAgain} data-testid="result-play-again">
               Play again
             </Button>
             <Button onClick={() => go('menu')} data-testid="result-main-menu">

@@ -81,7 +81,13 @@ export function GameScreen() {
   )
 
   return (
-    <main className="game-viewport" data-testid="screen-game" data-screen="game" data-phase={phase}>
+    <main
+      className="game-viewport"
+      data-testid="screen-game"
+      data-screen="game"
+      data-phase={phase}
+      data-touch={touch ? 'true' : 'false'}
+    >
       <ScreenTitle testId="game-title" className="sr-only">
         Pirate Battle match
       </ScreenTitle>

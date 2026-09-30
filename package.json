@@ -34,6 +34,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^30.1.1",
     "msw": "^3.0.0",
     "oxlint": "^1.81.0",
     "prettier": "^3.9.9",
@@ -42,5 +43,10 @@
     "vite": "^8.3.0",
     "vite-plugin-static-copy": "^4.1.1",
     "vitest": "^5.0.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

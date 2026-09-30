@@ -1,26 +1,31 @@
-import type { UseQueryResult } from '@tanstack/react-query'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
+import { useQuery, type UseQueryResult } from '@tanstack/react-query'
 import type { MatchHistoryPage, RankingPage } from '../contracts/api.ts'
 import type { MatchConfig, MatchRecord } from '../contracts/match.ts'
 import type { SubmissionStatus } from '../contracts/outbox.ts'
 import { LIMITS } from '../config/limits.ts'
+import { getSubmissionView, retryMatch, subscribeOutbox } from './outbox.ts'
+import { historyQueryOptions, rankingQueryOptions } from './queries.ts'
 
-// STUB: public signatures agreed between the shell and network work. Owned by the network work,
-// which replaces the bodies (TanStack Query + Axios). Do not change signatures without a contract update.
-
+/**
+ * Ranking of one config, one page. `isFetching` is true during background refetches while the
+ * previous data stays visible (`data` is kept across page changes of the same config).
+ */
 export function useRanking(
-  _config: MatchConfig,
-  _page: number,
-  _pageSize: number = LIMITS.pageSize.default,
+  config: MatchConfig,
+  page: number,
+  pageSize: number = LIMITS.pageSize.default,
 ): UseQueryResult<RankingPage> {
-  throw new Error('Not implemented')
+  return useQuery(rankingQueryOptions(config, page, pageSize))
 }
 
+/** Match history of one player, newest first, one page. */
 export function usePlayerMatches(
-  _playerId: string,
-  _page: number,
-  _pageSize: number = LIMITS.pageSize.default,
+  playerId: string,
+  page: number,
+  pageSize: number = LIMITS.pageSize.default,
 ): UseQueryResult<MatchHistoryPage> {
-  throw new Error('Not implemented')
+  return useQuery(historyQueryOptions(playerId, page, pageSize))
 }
 
 export interface MatchSubmissionState {
@@ -30,7 +35,22 @@ export interface MatchSubmissionState {
   retry: () => void
 }
 
-/** Observes one match in the outbox. `null` matchId -> `null` result. */
-export function useMatchSubmission(_matchId: string | null): MatchSubmissionState | null {
-  throw new Error('Not implemented')
+/**
+ * Observes one match in the outbox. `null` matchId -> `null` result. Also `null` when the outbox
+ * does not know the match (never enqueued, or cleared by `resetMocks`). Re-renders only when the
+ * state of this match changes.
+ */
+export function useMatchSubmission(matchId: string | null): MatchSubmissionState | null {
+  const view = useSyncExternalStore(
+    subscribeOutbox,
+    () => getSubmissionView(matchId),
+    () => null,
+  )
+  const retry = useCallback(() => {
+    if (matchId !== null) retryMatch(matchId)
+  }, [matchId])
+  return useMemo(
+    () => (view ? { status: view.status, record: view.record, error: view.error, retry } : null),
+    [view, retry],
+  )
 }

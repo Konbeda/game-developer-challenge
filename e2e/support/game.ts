@@ -69,8 +69,8 @@ export async function finishMatch(page: Page): Promise<MatchSubmission> {
 
 /**
  * Plays the running match to its end with a tiny auto-aim bot that uses the REAL keyboard pipeline
- * (it dispatches `keydown`/`keyup` for Space/A/D on `window`): it turns toward the nearest enemy and
- * fires the front cannon, never moving. With `seed: 1`, `EMPTY_BOARD_CONFIG` style configs and a
+ * (it dispatches `keydown`/`keyup` for W/A/S/D and the Up arrow on `window`): it sails towards the
+ * nearest enemy (8 directions) and fires the front cannon when lined up. With `seed: 1`, `EMPTY_BOARD_CONFIG` style configs and a
  * long spawn interval (e.g. 60 s / 10 s) it survives to `time_up`; an idle player (`finishMatch`)
  * is always destroyed. The viewport is shrunk while the bot runs (every `advance` renders once and
  * software WebGL is slow at full size) and restored afterwards. Returns the persisted submission.
@@ -109,16 +109,16 @@ export async function playBotToEnd(page: Page, stepMs = 100): Promise<MatchSubmi
         }
       }
       if (target) {
-        const diff = normalise(
-          Math.atan2(target.y - snap.player.y, target.x - snap.player.x) - snap.player.angle,
-        )
-        set('KeyD', diff > 0.05)
-        set('KeyA', diff < -0.05)
-        set('Space', Math.abs(diff) < 0.2)
+        const toTarget = Math.atan2(target.y - snap.player.y, target.x - snap.player.x)
+        const ax = Math.cos(toTarget)
+        const ay = Math.sin(toTarget)
+        set('KeyD', ax > 0.38)
+        set('KeyA', ax < -0.38)
+        set('KeyS', ay > 0.38)
+        set('KeyW', ay < -0.38)
+        set('ArrowUp', Math.abs(normalise(toTarget - snap.player.angle)) < 0.2)
       } else {
-        set('KeyD', false)
-        set('KeyA', false)
-        set('Space', false)
+        for (const code of ['KeyD', 'KeyA', 'KeyS', 'KeyW', 'ArrowUp']) set(code, false)
       }
       game.advance(step)
     }

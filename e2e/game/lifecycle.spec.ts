@@ -107,11 +107,11 @@ test.describe('End of match', () => {
     const run = async () => {
       await app.open({ seed: 42 })
       await startMatch(page)
-      await page.keyboard.down(KEYS.forward)
-      await page.keyboard.down(KEYS.right)
+      await page.keyboard.down(KEYS.east)
+      await page.keyboard.down(KEYS.south)
       const snaps = await sample(page, 8_000, 500)
-      await page.keyboard.up(KEYS.forward)
-      await page.keyboard.up(KEYS.right)
+      await page.keyboard.up(KEYS.east)
+      await page.keyboard.up(KEYS.south)
       return snaps.map((s) => ({
         t: s.timeMs,
         p: [
@@ -156,9 +156,9 @@ test.describe('Pause, focus loss and resume', () => {
   })
 
   test('pausing freezes the clock, the ship and the cooldowns', async ({ app, page }) => {
-    await page.keyboard.down(KEYS.forward)
+    await page.keyboard.down(KEYS.east)
     await advance(page, 500)
-    await page.keyboard.up(KEYS.forward)
+    await page.keyboard.up(KEYS.east)
     await app.game.pause.click()
     await expect(app.game.pauseDialog).toBeVisible()
     expect((await hud(page)).phase).toBe('paused')
@@ -205,7 +205,7 @@ test.describe('Pause, focus loss and resume', () => {
     const paused = await snapshot(page)
 
     // The player mashes keys while paused; none of it may take effect after resuming.
-    await page.keyboard.down(KEYS.forward)
+    await page.keyboard.down(KEYS.east)
     await page.keyboard.down(KEYS.front)
     await advance(page, 2_000)
     await app.game.resume.click()
@@ -220,7 +220,7 @@ test.describe('Pause, focus loss and resume', () => {
       Math.hypot(later.player.x - paused.player.x, later.player.y - paused.player.y),
     ).toBeLessThan(2)
     expect(later.projectiles.filter((p) => p.owner === 'player')).toHaveLength(0)
-    await page.keyboard.up(KEYS.forward)
+    await page.keyboard.up(KEYS.east)
     await page.keyboard.up(KEYS.front)
   })
 

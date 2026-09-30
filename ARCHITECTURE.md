@@ -86,14 +86,16 @@ subscribe / onEnd / destroy`. It never sees frames.
 
 ## Input: keyboard, buttons and stick
 
-The simulation only understands six held booleans (`InputState`). Keyboard keys (`KEY_BINDINGS`) and the
-touch weapon buttons set them through `host.setInput`. The touch **steering stick** calls `host.setSteer`
-with a direction and a push (0..1); on every fixed step the host turns that, together with the ship's
-current heading, into forward / turn-left / turn-right (`src/game/steering.ts`, pure and unit tested) and
-ORs it with the held buttons. The angle convention of the stick (`atan2` of a screen vector) is the
-simulation's own, so no conversion is needed, and the simulation itself is unchanged. Below a dead zone
-(20 %) the stick does nothing, from 30 % it sails, and a reversal of more than ~108 degrees turns in place
-first. Steering, like held keys, is dropped on pause, resume, end of match and unmount.
+The simulation only understands six held booleans (`InputState`). Movement is **direction based** for every
+input method: W/A/S/D (`steerFromKeys` in `src/game/controls.ts`) and the touch stick both produce a
+`SteerTarget` (a screen direction and a push from 0 to 1) and call `host.setSteer`. On every fixed step the
+host turns that, together with the ship's current heading, into forward / turn-left / turn-right
+(`src/game/steering.ts`, pure and unit tested) and ORs it with the held buttons. The arrow keys (Up = front
+cannon, Left/Right = broadsides, `FIRE_BINDINGS`) and the touch weapon buttons set the fire booleans through
+`host.setInput`. The angle convention of a screen vector (`atan2(dy, dx)`, y down) is the simulation's own,
+so no conversion is needed and the simulation itself is unchanged. Below a dead zone (20 %) the stick does
+nothing, from 30 % it sails, and a reversal of more than ~108 degrees turns in place first; keys always mean a
+full push. Steering, like held keys, is dropped on pause, resume, end of match and unmount.
 
 ## Resource lifecycle
 

@@ -26,12 +26,15 @@ export function sample(page: Page, totalMs: number, stepMs = 100): Promise<SimSn
 
 /** Real keyboard shortcuts (KeyboardEvent.code), same bindings the game uses. */
 export const KEYS = {
-  forward: 'KeyW',
-  left: 'KeyA',
-  right: 'KeyD',
-  front: 'Space',
-  portBroadside: 'KeyQ',
-  starboardBroadside: 'KeyE',
+  // W/A/S/D name the screen direction to sail towards (north, west, south, east).
+  north: 'KeyW',
+  west: 'KeyA',
+  south: 'KeyS',
+  east: 'KeyD',
+  // Arrow keys fire: up = front cannon, left/right = port/starboard broadsides.
+  front: 'ArrowUp',
+  portBroadside: 'ArrowLeft',
+  starboardBroadside: 'ArrowRight',
 } as const
 
 /** Normalises an angle difference to (-PI, PI]. */

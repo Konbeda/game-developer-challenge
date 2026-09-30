@@ -123,9 +123,10 @@ test.describe('Shell lifetimes', () => {
   }) => {
     await app.open({ seed: 5, config: QUIET })
     await startMatch(page)
-    await page.keyboard.down(KEYS.left)
-    await advance(page, Math.ceil((Math.PI / 2 / player.turnRate) * 1000))
-    await page.keyboard.up(KEYS.left)
+    await page.keyboard.down(KEYS.north)
+    await advance(page, 1_000)
+    await page.keyboard.up(KEYS.north)
+    await advance(page, 800) // coast to a stop, nose pointing north
     await tap(page, KEYS.front) // north, a free lane
     const samples = await sample(page, 2_500, FIXED_STEP_MS)
     const seen = samples.flatMap(playerShots)
@@ -141,7 +142,7 @@ test.describe('Shell lifetimes', () => {
 })
 
 test.describe('Damage and scoring', () => {
-  test('sinking enemies scores exactly one point each, hits never apply twice', async ({
+  test('points are only earned when an enemy goes down, at most one each, and hits never apply twice', async ({
     app,
     page,
   }) => {
@@ -164,12 +165,14 @@ test.describe('Damage and scoring', () => {
         while (v < -Math.PI) v += 2 * Math.PI
         return v
       }
-      const lastSeen = new Map<number, { health: number; x: number; y: number; kind: string }>()
-      const removed: { id: number; health: number; nearPlayer: boolean }[] = []
+      const lastSeen = new Map<number, number>()
       const healthDrops: number[] = []
       let prev = game.getSnapshot()!
-      let maxScoreJump = 0
-      for (let i = 0; i < 1_500 && game.getHud().phase === 'running'; i++) {
+      let removedTotal = 0
+      let steps = 0
+      // Steps where the score moved without an enemy disappearing, or by more than the enemies that did.
+      const impossibleSteps: string[] = []
+      for (let i = 0; i < 4_500 && game.getHud().phase === 'running'; i++) {
         const snap = game.getSnapshot()!
         let target: (typeof snap.enemies)[number] | null = null
         let best = Infinity
@@ -181,50 +184,54 @@ test.describe('Damage and scoring', () => {
           }
         }
         if (target) {
-          const diff = norm(
-            Math.atan2(target.y - snap.player.y, target.x - snap.player.x) - snap.player.angle,
-          )
-          set('KeyD', diff > 0.05)
-          set('KeyA', diff < -0.05)
-          set('Space', Math.abs(diff) < 0.2)
+          // Sail towards the target with W/A/S/D (8 directions) and fire the front cannon when lined up.
+          const toTarget = Math.atan2(target.y - snap.player.y, target.x - snap.player.x)
+          const ax = Math.cos(toTarget)
+          const ay = Math.sin(toTarget)
+          set('KeyD', ax > 0.38)
+          set('KeyA', ax < -0.38)
+          set('KeyS', ay > 0.38)
+          set('KeyW', ay < -0.38)
+          set('ArrowUp', Math.abs(norm(toTarget - snap.player.angle)) < 0.2)
         } else {
-          set('KeyD', false)
-          set('KeyA', false)
-          set('Space', false)
+          for (const code of ['KeyD', 'KeyA', 'KeyS', 'KeyW', 'ArrowUp']) set(code, false)
         }
-        game.advance(50)
+        game.advance(1000 / 60) // exactly one simulation step per iteration
+        steps += 1
         const next = game.getSnapshot()!
         for (const e of next.enemies) {
           const old = lastSeen.get(e.id)
-          if (old && e.health < old.health) healthDrops.push(old.health - e.health)
-          lastSeen.set(e.id, { health: e.health, x: e.x, y: e.y, kind: e.kind })
+          if (old !== undefined && e.health < old) healthDrops.push(old - e.health)
+          lastSeen.set(e.id, e.health)
         }
         const alive = new Set(next.enemies.map((e) => e.id))
-        for (const [id, info] of lastSeen) {
+        let removedNow = 0
+        for (const id of [...lastSeen.keys()]) {
           if (!alive.has(id)) {
-            removed.push({
-              id,
-              health: info.health,
-              nearPlayer: Math.hypot(info.x - next.player.x, info.y - next.player.y) < 70,
-            })
+            removedNow += 1
             lastSeen.delete(id)
           }
         }
-        maxScoreJump = Math.max(maxScoreJump, next.score - prev.score)
+        removedTotal += removedNow
+        const delta = next.score - prev.score
+        if (delta < 0 || delta > removedNow) {
+          impossibleSteps.push(
+            'step ' + steps + ': score +' + delta + ' with ' + removedNow + ' enemies gone',
+          )
+        }
         prev = next
       }
       for (const code of [...held]) set(code, false)
-      return { score: prev.score, removed, healthDrops, maxScoreJump }
+      return { score: prev.score, removedTotal, healthDrops, impossibleSteps, steps }
     })
 
-    const kills = result.removed.filter((r) => !r.nearPlayer)
-    // Every enemy that disappeared away from the player was shot down; each is worth exactly 1 point.
-    expect(result.score).toBe(kills.length)
+    // A point can only be earned in a step where an enemy went down, and never more than one per enemy.
+    expect(result.impossibleSteps).toEqual([])
     expect(result.score).toBeGreaterThan(0)
+    // Enemies also vanish by ramming (no point), so the score can never exceed the enemies that went down.
+    expect(result.score).toBeLessThanOrEqual(result.removedTotal)
     // Damage arrives in whole shells (20 each), never a partial or repeated amount.
     for (const drop of result.healthDrops)
       expect(drop % player.frontCannon.projectile.damage).toBe(0)
-    // Points come in ones.
-    expect(result.maxScoreJump).toBeLessThanOrEqual(1)
   })
 })

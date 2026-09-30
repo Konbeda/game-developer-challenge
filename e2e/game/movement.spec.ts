@@ -4,12 +4,16 @@ import { advance, expect, snapshot, startMatch, test } from '../support/index.ts
 import { angleDiff, KEYS, sample } from './helpers.ts'
 
 // README item 3: start of match, movement, rotation, arena limits and island collision.
+// Movement is direction based: W/A/S/D name the screen direction to sail (no tank controls).
 
 const { player, islands } = DEFAULT_GAMEPLAY
 
+// A slow spawn interval keeps every enemy away, so the player survives long measurements.
+const QUIET = { sessionSeconds: 180, spawnIntervalMs: 10_000 }
+
 test.describe('Movement and rotation', () => {
   test.beforeEach(async ({ app, page }) => {
-    await app.open({ seed: 3 })
+    await app.open({ seed: 3, config: QUIET })
     await startMatch(page)
   })
 
@@ -25,22 +29,24 @@ test.describe('Movement and rotation', () => {
     expect(snap.islands.length).toBeGreaterThan(0)
   })
 
-  test('a ship only moves forward while the forward key is held', async ({ page }) => {
+  test('the ship only sails while a direction key is held, then coasts to a stop', async ({
+    page,
+  }) => {
     const start = await snapshot(page)
     await advance(page, 500)
     const idle = await snapshot(page)
     expect(idle.player.x).toBeCloseTo(start.player.x, 1)
 
-    await page.keyboard.down(KEYS.forward)
+    // The ship already faces east, so D is straight ahead.
+    await page.keyboard.down(KEYS.east)
     await advance(page, 1_000)
     const moved = await snapshot(page)
-    // Heading east: x grows, y stays put.
     expect(moved.player.x - start.player.x).toBeGreaterThan(80)
     expect(Math.abs(moved.player.y - start.player.y)).toBeLessThan(2)
     // Speed never exceeds the configured maximum.
     expect(moved.player.x - start.player.x).toBeLessThanOrEqual(player.maxSpeed * 1.05)
 
-    await page.keyboard.up(KEYS.forward)
+    await page.keyboard.up(KEYS.east)
     await advance(page, 1_000)
     const stopped = await snapshot(page)
     await advance(page, 500)
@@ -48,28 +54,59 @@ test.describe('Movement and rotation', () => {
     expect(later.player.x).toBeCloseTo(stopped.player.x, 1)
   })
 
-  test('turning left and right rotates at the configured rate', async ({ page }) => {
+  test('a direction key turns the ship to that screen direction at the configured rate', async ({
+    page,
+  }) => {
     const start = await snapshot(page)
-    await page.keyboard.down(KEYS.right)
-    await advance(page, 500)
-    await page.keyboard.up(KEYS.right)
-    const right = await snapshot(page)
-    // Positive angle = clockwise on screen.
-    expect(angleDiff(right.player.angle, start.player.angle)).toBeCloseTo(player.turnRate * 0.5, 1)
-    // Turning alone does not translate the ship.
-    expect(right.player.x).toBeCloseTo(start.player.x, 1)
+    // S points south, clockwise from the east-facing bow: the ship swings round at turnRate.
+    await page.keyboard.down(KEYS.south)
+    await advance(page, 300)
+    const turning = await snapshot(page)
+    expect(angleDiff(turning.player.angle, start.player.angle)).toBeCloseTo(
+      player.turnRate * 0.3,
+      1,
+    )
+    await advance(page, 1_200)
+    const south = await snapshot(page)
+    expect(Math.abs(angleDiff(south.player.angle, Math.PI / 2))).toBeLessThan(0.1)
+    expect(south.player.y).toBeGreaterThan(start.player.y + 20)
+    await page.keyboard.up(KEYS.south)
 
-    await page.keyboard.down(KEYS.left)
-    await advance(page, 1_000)
-    await page.keyboard.up(KEYS.left)
-    const left = await snapshot(page)
-    expect(angleDiff(left.player.angle, right.player.angle)).toBeCloseTo(-player.turnRate, 1)
+    // W points north, anti-clockwise from south: it swings back the short way round.
+    await page.keyboard.down(KEYS.north)
+    await advance(page, 2_400)
+    await page.keyboard.up(KEYS.north)
+    const north = await snapshot(page)
+    expect(Math.abs(angleDiff(north.player.angle, -Math.PI / 2))).toBeLessThan(0.1)
+  })
+
+  test('two keys make a diagonal, and opposite keys cancel out', async ({ page }) => {
+    await page.keyboard.down(KEYS.north)
+    await page.keyboard.down(KEYS.east)
+    await advance(page, 1_200)
+    const northEast = await snapshot(page)
+    expect(Math.abs(angleDiff(northEast.player.angle, -Math.PI / 4))).toBeLessThan(0.1)
+    await page.keyboard.up(KEYS.north)
+    await page.keyboard.up(KEYS.east)
+    await advance(page, 1_500)
+
+    // A and D together cancel: no steering, so the ship just coasts to a stop and keeps its heading.
+    const before = await snapshot(page)
+    await page.keyboard.down(KEYS.west)
+    await page.keyboard.down(KEYS.east)
+    await advance(page, 1_500)
+    const after = await snapshot(page)
+    expect(angleDiff(after.player.angle, before.player.angle)).toBeCloseTo(0, 2)
+    expect(
+      Math.hypot(after.player.x - before.player.x, after.player.y - before.player.y),
+    ).toBeLessThan(2)
+    await page.keyboard.up(KEYS.west)
+    await page.keyboard.up(KEYS.east)
   })
 
   test('movement and firing work at the same time', async ({ page }) => {
     const start = await snapshot(page)
-    await page.keyboard.down(KEYS.forward)
-    await page.keyboard.down(KEYS.right)
+    await page.keyboard.down(KEYS.south)
     await page.keyboard.down(KEYS.front)
     await advance(page, 700)
     const snap = await snapshot(page)
@@ -78,46 +115,30 @@ test.describe('Movement and rotation', () => {
     ).toBeGreaterThan(40)
     expect(angleDiff(snap.player.angle, start.player.angle)).toBeGreaterThan(0.5)
     expect(snap.projectiles.some((p) => p.owner === 'player')).toBe(true)
+    await page.keyboard.up(KEYS.south)
+    await page.keyboard.up(KEYS.front)
   })
 })
 
 test.describe('Arena limits', () => {
-  // A slow spawn interval keeps every enemy away during the run, so the player survives to measure.
-  const config = { sessionSeconds: 180, spawnIntervalMs: 10_000 }
   const r = player.radius
-  const quarter = Math.ceil((Math.PI / 2 / player.turnRate) * 1000)
-  const half = Math.ceil((Math.PI / player.turnRate) * 1000)
 
-  type Turn = { key: string; ms: number }
-  const walls: {
-    name: string
-    turns: Turn[]
-    driveMs: number
-    check: (s: SimSnapshot) => number
-  }[] = [
-    {
-      name: 'north',
-      turns: [{ key: KEYS.left, ms: quarter }],
-      driveMs: 6_000,
-      check: (s) => s.player.y,
-    },
+  type Leg = { key: string; ms: number }
+  const walls: { name: string; legs: Leg[]; check: (s: SimSnapshot) => number }[] = [
+    { name: 'north', legs: [{ key: KEYS.north, ms: 6_000 }], check: (s) => s.player.y },
     {
       name: 'south',
-      turns: [{ key: KEYS.right, ms: quarter }],
-      driveMs: 7_000,
+      legs: [{ key: KEYS.south, ms: 7_000 }],
       check: (s) => ARENA.height - s.player.y,
     },
-    {
-      name: 'west',
-      turns: [{ key: KEYS.right, ms: half }],
-      driveMs: 4_000,
-      check: (s) => s.player.x,
-    },
-    // East: go down to the bottom lane first (free of islands), then along it to the east wall.
+    { name: 'west', legs: [{ key: KEYS.west, ms: 4_500 }], check: (s) => s.player.x },
+    // East: down to the bottom lane first (free of islands), then along it to the east wall.
     {
       name: 'east',
-      turns: [{ key: KEYS.right, ms: quarter }],
-      driveMs: 0,
+      legs: [
+        { key: KEYS.south, ms: 4_000 },
+        { key: KEYS.east, ms: 8_000 },
+      ],
       check: (s) => ARENA.width - s.player.x,
     },
   ]
@@ -127,22 +148,13 @@ test.describe('Arena limits', () => {
       app,
       page,
     }) => {
-      await app.open({ seed: 3, config })
+      await app.open({ seed: 3, config: QUIET })
       await startMatch(page)
       const all: SimSnapshot[] = []
-      const hold = async (key: string, ms: number) => {
-        await page.keyboard.down(key)
-        all.push(...(await sample(page, ms)))
-        await page.keyboard.up(key)
-      }
-
-      for (const t of wall.turns) await hold(t.key, t.ms)
-      if (wall.name === 'east') {
-        await hold(KEYS.forward, 4_000) // south wall
-        await hold(KEYS.left, quarter) // face east
-        await hold(KEYS.forward, 7_000) // along the bottom lane
-      } else {
-        await hold(KEYS.forward, wall.driveMs)
+      for (const leg of wall.legs) {
+        await page.keyboard.down(leg.key)
+        all.push(...(await sample(page, leg.ms)))
+        await page.keyboard.up(leg.key)
       }
 
       for (const s of all) {
@@ -160,15 +172,15 @@ test.describe('Arena limits', () => {
 
 test.describe('Islands block ships', () => {
   test('driving straight into an island never overlaps or crosses it', async ({ app, page }) => {
-    await app.open({ seed: 3 })
+    await app.open({ seed: 3, config: QUIET })
     await startMatch(page)
     // The start lane (heading east at y = 450) runs into the central island.
     const centre = islands.reduce((best, i) =>
       Math.abs(i.y - player.start.y) < Math.abs(best.y - player.start.y) ? i : best,
     )
-    await page.keyboard.down(KEYS.forward)
+    await page.keyboard.down(KEYS.east)
     const samples = await sample(page, 8_000, 50)
-    await page.keyboard.up(KEYS.forward)
+    await page.keyboard.up(KEYS.east)
 
     for (const s of samples) {
       for (const island of s.islands) {
@@ -186,16 +198,14 @@ test.describe('Islands block ships', () => {
     app,
     page,
   }) => {
-    await app.open({ seed: 3 })
+    await app.open({ seed: 3, config: QUIET })
     await startMatch(page)
-    const island = islands[0]!
-    // Steer slightly towards the island and keep going for a long time.
-    await page.keyboard.down(KEYS.right)
-    await advance(page, 200)
-    await page.keyboard.up(KEYS.right)
-    await page.keyboard.down(KEYS.forward)
+    // South-east runs into the central island's flank; keep pushing for a long time.
+    await page.keyboard.down(KEYS.south)
+    await page.keyboard.down(KEYS.east)
     const samples = await sample(page, 8_000, 50)
-    await page.keyboard.up(KEYS.forward)
+    await page.keyboard.up(KEYS.south)
+    await page.keyboard.up(KEYS.east)
     for (const s of samples) {
       for (const i of s.islands) {
         expect(Math.hypot(s.player.x - i.x, s.player.y - i.y)).toBeGreaterThanOrEqual(
@@ -203,6 +213,11 @@ test.describe('Islands block ships', () => {
         )
       }
     }
-    expect(island.radius).toBeGreaterThan(0)
+    // It kept moving (slid along) instead of freezing against the island.
+    const first = samples[20]!
+    const last = samples.at(-1)!
+    expect(
+      Math.hypot(last.player.x - first.player.x, last.player.y - first.player.y),
+    ).toBeGreaterThan(40)
   })
 })

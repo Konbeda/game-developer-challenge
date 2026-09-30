@@ -69,6 +69,10 @@ E2E_GPU=1 pnpm e2e                      # run with installed Google Chrome on th
 E2E_WORKERS=1 pnpm e2e                  # fewer parallel browsers
 ```
 
+Visual baselines (`e2e/__screenshots__`) were generated on Windows with the bundled Chromium (software
+rendering) and are compared in local runs; CI skips the pixel comparison because fonts render differently
+on Linux (set `E2E_VISUAL=1` to force it).
+
 The E2E bundle is built with `--mode e2e` (see `.env.e2e`), which exposes the `window.__game` test hook
 (state observation and a controllable simulation clock). The public build never exposes it.
 

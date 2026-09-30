@@ -18,6 +18,9 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/__screenshots__/{projectName}/{testFilePath}/{arg}{ext}',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
+  // Visual baselines were generated on Windows; font rendering differs on Linux runners, so CI skips the
+  // pixel comparison unless E2E_VISUAL=1 (with baselines generated on that platform).
+  ignoreSnapshots: !!process.env.CI && process.env.E2E_VISUAL !== '1',
   retries: process.env.CI ? 1 : 0,
   // The preview server aborts navigations under heavy parallel load; a few workers stay reliable.
   workers: process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : 3,

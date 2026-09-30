@@ -93,6 +93,8 @@ export class PixiGameHost implements GameHost {
       height: Math.max(1, container.clientHeight),
       background: 0x0a1a2e,
       antialias: true,
+      // Ask dual-GPU laptops for the discrete card; harmless on single-GPU machines.
+      powerPreference: 'high-performance',
       autoDensity: true,
       resolution: Math.min(window.devicePixelRatio || 1, MAX_RESOLUTION),
     })

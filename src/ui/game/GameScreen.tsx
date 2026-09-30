@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useStore } from 'zustand'
-import type { InputState } from '../../game/contracts.ts'
+import type { InputState, SteerTarget } from '../../game/contracts.ts'
 import { useAppStore } from '../../state/appStore.ts'
 import { usePortraitPhone, useTouchControls } from '../lib/media.ts'
 import {
@@ -75,6 +75,11 @@ export function GameScreen() {
     [hostRef],
   )
 
+  const steer = useCallback(
+    (target: SteerTarget | null) => hostRef.current?.setSteer(target),
+    [hostRef],
+  )
+
   return (
     <main className="game-viewport" data-testid="screen-game" data-screen="game" data-phase={phase}>
       <ScreenTitle testId="game-title" className="sr-only">
@@ -86,7 +91,7 @@ export function GameScreen() {
 
           {load.status === 'ready' ? <Hud onPause={pauseManually} /> : null}
           {load.status === 'ready' && touch ? (
-            <TouchControls enabled={playing} onHold={hold} />
+            <TouchControls enabled={playing} onHold={hold} onSteer={steer} />
           ) : null}
 
           {load.status === 'loading' ? (

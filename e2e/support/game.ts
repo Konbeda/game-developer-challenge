@@ -1,5 +1,5 @@
 import { expect, type Page } from '@playwright/test'
-import type { HudState, InputState, SimSnapshot } from '../../src/game/contracts.ts'
+import type { HudState, SimSnapshot } from '../../src/game/contracts.ts'
 import type { MatchSubmission } from '../../src/contracts/match.ts'
 import { readLastResult } from './storage.ts'
 
@@ -138,12 +138,9 @@ export async function playMatchToResult(page: Page): Promise<MatchSubmission> {
   return finishMatch(page)
 }
 
-type TouchAction = keyof InputState
+type TouchAction = 'fireFront' | 'fireLeft' | 'fireRight'
 
 const TOUCH_TESTIDS: Record<TouchAction, string> = {
-  forward: 'touch-forward',
-  turnLeft: 'touch-turn-left',
-  turnRight: 'touch-turn-right',
   fireFront: 'touch-fire-front',
   fireLeft: 'touch-fire-left',
   fireRight: 'touch-fire-right',
@@ -187,4 +184,66 @@ export async function touchRelease(
 /** Number of projectiles currently in flight, by owner. */
 export function projectilesBy(snap: SimSnapshot, owner: 'player' | 'enemy'): number {
   return snap.projectiles.filter((p) => p.owner === owner).length
+}
+
+// ---- steering stick ----------------------------------------------------------------------------
+
+/** Same as the component: a full push is 85 % of the pad radius. */
+const STICK_FULL_PUSH = 0.85
+
+async function stickPoint(page: Page, angle: number, magnitude: number) {
+  const box = await page.getByTestId('touch-stick').boundingBox()
+  if (!box)
+    throw new Error('The steering stick is not on screen (needs ?touch=1 or a touch device)')
+  const radius = box.width / 2
+  const distance = magnitude * STICK_FULL_PUSH * radius
+  return {
+    clientX: box.x + radius + Math.cos(angle) * distance,
+    clientY: box.y + radius + Math.sin(angle) * distance,
+  }
+}
+
+async function stickEvent(
+  page: Page,
+  type: 'pointerdown' | 'pointermove' | 'pointerup',
+  pointerId: number,
+  point: { clientX: number; clientY: number },
+) {
+  await page.getByTestId('touch-stick').dispatchEvent(type, {
+    pointerId,
+    pointerType: 'touch',
+    isPrimary: pointerId === 1,
+    button: 0,
+    buttons: type === 'pointerup' ? 0 : 1,
+    pressure: type === 'pointerup' ? 0 : 0.5,
+    ...point,
+  })
+}
+
+/**
+ * Puts a finger on the steering stick pointing at `angle` (radians, 0 = east, clockwise positive,
+ * like the simulation) pushed `magnitude` of the way (0..1). Dead zone is 0.2.
+ */
+export async function touchStickDown(
+  page: Page,
+  angle: number,
+  magnitude: number,
+  pointerId: number,
+): Promise<void> {
+  await stickEvent(page, 'pointerdown', pointerId, await stickPoint(page, angle, magnitude))
+}
+
+/** Slides the finger that is already down on the stick to a new direction/push. */
+export async function touchStickMove(
+  page: Page,
+  angle: number,
+  magnitude: number,
+  pointerId: number,
+): Promise<void> {
+  await stickEvent(page, 'pointermove', pointerId, await stickPoint(page, angle, magnitude))
+}
+
+/** Lifts the finger from the stick. */
+export async function touchStickUp(page: Page, pointerId: number): Promise<void> {
+  await stickEvent(page, 'pointerup', pointerId, await stickPoint(page, 0, 0))
 }

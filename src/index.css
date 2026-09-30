@@ -567,32 +567,170 @@ input {
     0 0 calc(3 * var(--hud)) rgba(0, 0, 0, 0.6);
 }
 
+/* ---------- Touch controls ----------
+   Sprites: Kenney "Mobile Controls" (CC0), copied to public/vendor/kenney-mobile-controls.
+   Credit and license: THIRD_PARTY_LICENSES.md. Controls are semi-transparent so the arena stays
+   readable, and become more opaque while held. */
+
 .touch-controls {
   --touch: clamp(2.9rem, 7.4cqw, 5.4rem);
+  --stick: calc(2.7 * var(--touch));
+  --fire-big: calc(1.7 * var(--touch));
+  --fire-small: calc(1.25 * var(--touch));
 }
 
-.touch-cluster {
-  bottom: 4cqh;
-  width: calc(3.36 * var(--touch));
-  height: calc(1.68 * var(--touch));
-  pointer-events: none;
-}
-
-.touch-cluster--left {
-  left: 2.4cqw;
-}
-
-.touch-cluster--right {
-  right: 2.4cqw;
-}
-
-.touch-cluster > .touch-btn {
-  --round: var(--touch);
+.touch-ctl {
   position: absolute;
   pointer-events: auto;
   touch-action: none;
   -webkit-touch-callout: none;
+  -webkit-user-select: none;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0.7;
+  transition: opacity 120ms ease-out;
+}
+
+.touch-ctl[data-active='true'],
+.touch-ctl[aria-pressed='true'] {
+  opacity: 0.95;
+}
+
+.touch-ctl:disabled {
+  opacity: 0.3;
+}
+
+.touch-stick {
+  left: 2.4cqw;
+  bottom: 4cqh;
+  width: var(--stick);
+  height: var(--stick);
+  border-radius: 50%;
+  background: url('/vendor/kenney-mobile-controls/style-a/joystick_circle_pad_a.png') center / 100%
+    100% no-repeat;
+}
+
+.touch-stick::after {
+  content: '';
+  position: absolute;
+  inset: -3%;
+  background: url('/vendor/kenney-mobile-controls/highlights-a/joystick_circle_pad_highlight.png')
+    center / 100% 100% no-repeat;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+  pointer-events: none;
+}
+
+.touch-stick[data-active='true']::after {
+  opacity: 1;
+}
+
+.touch-stick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44%;
+  height: 44%;
+  margin: -22% 0 0 -22%;
+  background: url('/vendor/kenney-mobile-controls/style-a/joystick_circle_nub_a.png') center / 100%
+    100% no-repeat;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.touch-fire-cluster {
+  right: 2.4cqw;
+  bottom: 4cqh;
+  width: calc(4.3 * var(--touch));
+  height: calc(2.4 * var(--touch));
+  pointer-events: none;
+}
+
+.touch-fire {
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+}
+
+.touch-fire::before,
+.touch-fire::after {
+  content: '';
+  position: absolute;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+}
+
+/* The icon. */
+.touch-fire::before {
+  inset: 24%;
+  background-size: contain;
+}
+
+/* The "held" ring. */
+.touch-fire::after {
+  inset: -3%;
+  background-size: 100% 100%;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.touch-fire[aria-pressed='true']::after {
+  opacity: 1;
+}
+
+.touch-fire--front {
+  left: calc(1.3 * var(--touch));
+  top: calc(0.25 * var(--touch));
+  width: var(--fire-big);
+  height: var(--fire-big);
+  background-image: url('/vendor/kenney-mobile-controls/style-a/button_circle.png');
+}
+
+.touch-fire--front::before {
+  background-image: url('/vendor/kenney-mobile-controls/icons/icon_crosshair.png');
+}
+
+.touch-fire--front::after {
+  background-image: url('/vendor/kenney-mobile-controls/highlights-a/button_circle_highlight.png');
+}
+
+.touch-fire--left,
+.touch-fire--right {
+  top: calc(1.05 * var(--touch));
+  width: var(--fire-small);
+  height: var(--fire-small);
+}
+
+.touch-fire--left {
+  left: 0;
+  background-image: url('/vendor/kenney-mobile-controls/style-a/direction_left.png');
+}
+
+.touch-fire--left::before {
+  inset: 26% 16% 26% 34%;
+  background-image: url('/vendor/kenney-mobile-controls/icons/icon_fire.png');
+}
+
+.touch-fire--left::after {
+  background-image: url('/vendor/kenney-mobile-controls/highlights-a/direction_left_highlight.png');
+}
+
+.touch-fire--right {
+  left: calc(3.05 * var(--touch));
+  background-image: url('/vendor/kenney-mobile-controls/style-a/direction_right.png');
+}
+
+.touch-fire--right::before {
+  inset: 26% 34% 26% 16%;
+  background-image: url('/vendor/kenney-mobile-controls/icons/icon_fire.png');
+}
+
+.touch-fire--right::after {
+  background-image: url('/vendor/kenney-mobile-controls/highlights-a/direction_right_highlight.png');
 }
 
 /* ---------- Rotate overlay ---------- */

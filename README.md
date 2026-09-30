@@ -88,18 +88,21 @@ Copy `.env.example` to `.env` if you need any of them; all are optional.
 
 ## Controls
 
-| Action                          | Keyboard   | Touch                |
-| ------------------------------- | ---------- | -------------------- |
-| Sail forward                    | `W` / `Up` | Forward button       |
-| Turn left / right               | `A` `D` / `Left` `Right` | Turn buttons |
-| Fire front cannon (1 shot)      | `Space`    | Front cannon button  |
-| Fire left broadside (3 shots)   | `Q`        | Left broadside button |
-| Fire right broadside (3 shots)  | `E`        | Right broadside button |
-| Pause                           | `P` / `Esc` | Pause button        |
+| Action                           | Keyboard                 | Touch                        |
+| -------------------------------- | ------------------------ | ---------------------------- |
+| Sail forward                     | `W` / `Up`               | Push the stick               |
+| Turn left / right                | `A` `D` / `Left` `Right` | Point the stick to steer     |
+| Fire front cannon (1 shot)       | `Space`                  | Crosshair button             |
+| Fire left broadside (3 shots)    | `Q`                      | Left flame button            |
+| Fire right broadside (3 shots)   | `E`                      | Right flame button           |
+| Pause                            | `P` / `Esc`              | Pause button                 |
 
-Movement and firing work at the same time. The touch buttons are multi-touch and appear on touch
-devices (or with `?touch=1`). Keys are captured only while a match is on screen and no dialog is open.
-On phones use **landscape**; in portrait a rotate prompt is shown and the match pauses.
+Movement and firing work at the same time. On touch screens the left thumb uses a **steering stick**:
+the ship turns to the direction you point and sails while the stick is pushed (a light touch in the
+centre only steers), and the right thumb uses the weapon buttons. The controls are semi-transparent so
+the arena stays readable, multi-touch capable, and appear on touch devices (or with `?touch=1`).
+Keys are captured only while a match is on screen and no dialog is open. On phones use **landscape**;
+in portrait a rotate prompt is shown and the match pauses.
 
 The match also pauses automatically when the window loses focus or the tab is hidden; resuming needs an
 explicit click on **Resume** and never applies input held during the pause.

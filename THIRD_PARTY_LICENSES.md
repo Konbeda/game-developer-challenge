@@ -33,3 +33,15 @@ provider; they are not covered by this file.
 
 The speaker glyph of the sound toggle (`src/ui/game/SoundToggle.tsx`) is an original inline SVG drawn
 for this project, because the provided UI sheet has no sound icon.
+
+## Touch control sprites
+
+The on-screen touch controls (steering stick, weapon buttons, pressed-state rings and their icons) use
+sprites from **Mobile Controls (1.0)** by **Kenney** (https://kenney.nl/assets/mobile-controls),
+released under **Creative Commons Zero (CC0 1.0)**: https://creativecommons.org/publicdomain/zero/1.0/
+Attribution is not required; it is given here anyway.
+
+Only the files used by the game are bundled, in `public/vendor/kenney-mobile-controls/`
+(`style-a/`: pad, nub, circle button, direction buttons; `highlights-a/`: pressed rings; `icons/`:
+crosshair, fire, burst), together with the pack's own `License.txt`. The files are the pack's
+"Large (2x)" PNGs, unmodified; the game draws them semi-transparent with CSS.

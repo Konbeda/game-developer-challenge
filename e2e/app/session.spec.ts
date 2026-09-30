@@ -1,7 +1,9 @@
+import { angleDiff } from '../game/helpers.ts'
 import {
   advance,
   expect,
   hasMatch,
+  hud,
   readLastResult,
   readOutbox,
   snapshot,
@@ -9,6 +11,9 @@ import {
   test,
   touchPress,
   touchRelease,
+  touchStickDown,
+  touchStickMove,
+  touchStickUp,
   waitForMatch,
 } from '../support/index.ts'
 
@@ -143,7 +148,7 @@ test.describe('Touch controls', () => {
     await expect(app.game.touchControls).toBeVisible()
   })
 
-  test('multi-touch: forward + front cannon at the same time, and release stops them', async ({
+  test('multi-touch: stick + front cannon at the same time, and release stops them', async ({
     app,
     page,
   }) => {
@@ -151,17 +156,17 @@ test.describe('Touch controls', () => {
     await startMatch(page)
     const before = await snapshot(page)
 
-    await touchPress(page, 'forward', 1)
+    // Right thumb on the front cannon while the left thumb pushes the stick east.
+    await touchStickDown(page, 0, 1, 1)
     await touchPress(page, 'fireFront', 2)
     await advance(page, 1_500)
     const moving = await snapshot(page)
     expect(
       Math.hypot(moving.player.x - before.player.x, moving.player.y - before.player.y),
     ).toBeGreaterThan(80)
-    const fired = moving.projectiles.some((p) => p.owner === 'player')
-    expect(fired).toBe(true)
+    expect(moving.projectiles.some((p) => p.owner === 'player')).toBe(true)
 
-    await touchRelease(page, 'forward', 1)
+    await touchStickUp(page, 1)
     await touchRelease(page, 'fireFront', 2)
     await advance(page, 1_200)
     const settled = await snapshot(page)
@@ -174,21 +179,66 @@ test.describe('Touch controls', () => {
     expect(later.projectiles.filter((p) => p.owner === 'player')).toHaveLength(0)
   })
 
-  test('turn buttons rotate the ship', async ({ app, page }) => {
-    await app.open({ touch: true })
+  test('the stick turns the ship to where it points and sails while it is pushed', async ({
+    app,
+    page,
+  }) => {
+    await app.open({ touch: true, config: { sessionSeconds: 180, spawnIntervalMs: 10_000 } })
     await startMatch(page)
-    const a = await snapshot(page)
-    await touchPress(page, 'turnRight', 3)
-    await advance(page, 500)
-    await touchRelease(page, 'turnRight', 3)
-    const b = await snapshot(page)
-    expect(b.player.angle).toBeGreaterThan(a.player.angle + 0.5)
+    const start = await snapshot(page)
 
-    await touchPress(page, 'turnLeft', 4)
+    // Point the stick south (clockwise from the east-facing bow): the ship swings round to ~south.
+    await touchStickDown(page, Math.PI / 2, 1, 1)
+    await advance(page, 1_400)
+    const south = await snapshot(page)
+    expect(Math.abs(angleDiff(south.player.angle, Math.PI / 2))).toBeLessThan(0.12)
+    expect(south.player.y).toBeGreaterThan(start.player.y + 20)
+
+    // Swing the stick to the north without lifting the finger: it comes all the way round.
+    await touchStickMove(page, -Math.PI / 2, 1, 1)
+    await advance(page, 2_400)
+    const north = await snapshot(page)
+    expect(Math.abs(angleDiff(north.player.angle, -Math.PI / 2))).toBeLessThan(0.12)
+    expect(north.player.y).toBeLessThan(south.player.y)
+
+    await touchStickUp(page, 1)
+  })
+
+  test('a light touch inside the dead zone neither turns nor moves the ship', async ({
+    app,
+    page,
+  }) => {
+    await app.open({ touch: true, config: { sessionSeconds: 180, spawnIntervalMs: 10_000 } })
+    await startMatch(page)
+    const before = await snapshot(page)
+    await touchStickDown(page, Math.PI / 2, 0.1, 1)
     await advance(page, 1_000)
-    await touchRelease(page, 'turnLeft', 4)
-    const c = await snapshot(page)
-    expect(c.player.angle).toBeLessThan(b.player.angle - 0.5)
+    const after = await snapshot(page)
+    expect(after.player.x).toBeCloseTo(before.player.x, 1)
+    expect(after.player.y).toBeCloseTo(before.player.y, 1)
+    expect(angleDiff(after.player.angle, before.player.angle)).toBeCloseTo(0, 2)
+    await touchStickUp(page, 1)
+  })
+
+  test('the stick lets go when the match is paused', async ({ app, page }) => {
+    await app.open({ touch: true, config: { sessionSeconds: 180, spawnIntervalMs: 10_000 } })
+    await startMatch(page)
+    await touchStickDown(page, 0, 1, 1)
+    await advance(page, 500)
+    await app.game.pause.click()
+    await expect(app.game.pauseDialog).toBeVisible()
+    await app.game.resume.click()
+    await expect.poll(async () => (await hud(page)).phase).toBe('running')
+    // The ship was at full speed, so it coasts a little (inertia) after the resume, then stops: the
+    // finger is still down on the glass but the game asked for a fresh touch, so no steering carried over.
+    await advance(page, 1_500)
+    const coasted = await snapshot(page)
+    await advance(page, 1_000)
+    const later = await snapshot(page)
+    expect(
+      Math.hypot(later.player.x - coasted.player.x, later.player.y - coasted.player.y),
+    ).toBeLessThan(1)
+    await touchStickUp(page, 1)
   })
 })
 

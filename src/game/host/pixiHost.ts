@@ -14,10 +14,12 @@ import {
   type MatchPhase,
   type MatchSettings,
   type SimSnapshot,
+  type SteerTarget,
   type Simulation,
 } from '../contracts.ts'
 import { GameScene } from '../render/scene.ts'
 import { createSimulation } from '../sim/index.ts'
+import { STEER, steerToInput } from '../steering.ts'
 import { isPerfEnabled, PerfSampler } from './perf.ts'
 
 /** Longest real frame the loop will catch up on, so a stalled tab cannot cause a spiral of steps. */
@@ -45,6 +47,7 @@ export class PixiGameHost implements GameHost {
   private settings: MatchSettings | null = null
   private phase: MatchPhase = 'idle'
   private input: InputState = { ...EMPTY_INPUT }
+  private steer: SteerTarget | null = null
   private accumulatorMs = 0
   private clockMode: 'realtime' | 'manual' = 'realtime'
   private hud: HudState = { ...INITIAL_HUD }
@@ -144,6 +147,7 @@ export class PixiGameHost implements GameHost {
     this.sim = createSimulation(effective)
     this.scene.reset()
     this.input = { ...EMPTY_INPUT }
+    this.steer = null
     this.accumulatorMs = 0
     this.pendingResult = null
     this.notifyInMs = 0
@@ -164,6 +168,7 @@ export class PixiGameHost implements GameHost {
     audio.stopAll()
     audio.play('game_pause', 0.6)
     this.input = { ...EMPTY_INPUT }
+    this.steer = null
     this.accumulatorMs = 0
     this.emitHud(true)
   }
@@ -172,6 +177,7 @@ export class PixiGameHost implements GameHost {
     if (this.phase !== 'paused') return
     // Nothing held during the pause carries over: the player must press again.
     this.input = { ...EMPTY_INPUT }
+    this.steer = null
     this.accumulatorMs = 0
     this.phase = 'running'
     audio.startLoop('ocean_ambience_loop', 0.22)
@@ -182,6 +188,11 @@ export class PixiGameHost implements GameHost {
   restart(): void {
     if (!this.settings) return
     this.start({ config: this.settings.config, seed: randomSeed() })
+  }
+
+  setSteer(target: SteerTarget | null): void {
+    if (this.phase !== 'running' && target !== null) return
+    this.steer = target
   }
 
   setInput(partial: Partial<InputState>): void {
@@ -253,7 +264,7 @@ export class PixiGameHost implements GameHost {
     if (this.phase === 'running' && this.sim) {
       this.accumulatorMs += dtMs
       while (this.accumulatorMs >= FIXED_STEP_MS && this.phase === 'running') {
-        this.sim.step(this.input)
+        this.sim.step(this.effectiveInput(this.sim))
         const events = this.sim.drainEvents()
         scene.handleEvents(events)
         audio.handleEvents(events)
@@ -278,9 +289,26 @@ export class PixiGameHost implements GameHost {
     if (render) this.requestRender()
   }
 
+  /**
+   * Held buttons plus, while the stick is pushed, what stick steering asks for. It reads the heading
+   * of the current step, so the ship settles on the stick's direction without overshooting at any
+   * frame rate. Allocates only while the stick is in use.
+   */
+  private effectiveInput(sim: Simulation): InputState {
+    if (!this.steer) return this.input
+    const asked = steerToInput(this.steer, sim.snapshot().player.angle)
+    return {
+      ...this.input,
+      forward: this.input.forward || asked.forward,
+      turnLeft: this.input.turnLeft || asked.turnLeft,
+      turnRight: this.input.turnRight || asked.turnRight,
+    }
+  }
+
   /** Sailing loop follows the throttle; a warning cue plays once when 10 seconds remain. */
   private updateAmbience(): void {
-    if (this.input.forward) audio.startLoop('ship_sailing_loop', 0.16)
+    const sailing = this.input.forward || (this.steer?.magnitude ?? 0) >= STEER.forwardFrom
+    if (sailing) audio.startLoop('ship_sailing_loop', 0.16)
     else audio.stopLoop('ship_sailing_loop')
     const seconds = this.settings?.config.sessionSeconds ?? 0
     if (!this.timeWarned && seconds > 10 && this.hud.timeRemainingMs <= 10_000) {
@@ -294,6 +322,7 @@ export class PixiGameHost implements GameHost {
     this.notifyInMs = END_NOTIFY_DELAY_MS
     this.phase = 'ended'
     this.input = { ...EMPTY_INPUT }
+    this.steer = null
     this.emitHud(true)
   }
 

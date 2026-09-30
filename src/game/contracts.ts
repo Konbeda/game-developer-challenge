@@ -1,4 +1,7 @@
 import type { MatchConfig, MatchResult } from '../contracts/match.ts'
+import type { SteerTarget } from './steering.ts'
+
+export type { SteerTarget }
 
 /** Logical arena size in world units. The renderer scales it to the screen; the simulation never sees pixels. */
 export const ARENA = { width: 1600, height: 900 } as const
@@ -103,6 +106,11 @@ export interface GameHost {
   resume(): void
   restart(): void
   setInput(partial: Partial<InputState>): void
+  /**
+   * Stick steering (touch): the ship turns towards `target.angle` and sails while the stick is pushed.
+   * `null` releases it. It adds to `setInput` (keys and buttons still work) and is dropped on pause.
+   */
+  setSteer(target: SteerTarget | null): void
   subscribe(listener: (hud: HudState) => void): () => void
   onEnd(listener: (result: MatchResult, settings: MatchSettings) => void): () => void
   /** Releases ticker, listeners, textures, entities and the canvas. Idempotent (React Strict Mode). */

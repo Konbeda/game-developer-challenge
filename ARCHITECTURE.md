@@ -84,6 +84,17 @@ subscribe / onEnd / destroy`. It never sees frames.
 - **Audio.** `AudioEngine` (Web Audio) maps simulation events to sounds. It is best effort: no device,
   blocked autoplay or failed download never throws. Mute is persisted.
 
+## Input: keyboard, buttons and stick
+
+The simulation only understands six held booleans (`InputState`). Keyboard keys (`KEY_BINDINGS`) and the
+touch weapon buttons set them through `host.setInput`. The touch **steering stick** calls `host.setSteer`
+with a direction and a push (0..1); on every fixed step the host turns that, together with the ship's
+current heading, into forward / turn-left / turn-right (`src/game/steering.ts`, pure and unit tested) and
+ORs it with the held buttons. The angle convention of the stick (`atan2` of a screen vector) is the
+simulation's own, so no conversion is needed, and the simulation itself is unchanged. Below a dead zone
+(20 %) the stick does nothing, from 30 % it sails, and a reversal of more than ~108 degrees turns in place
+first. Steering, like held keys, is dropped on pause, resume, end of match and unmount.
+
 ## Resource lifecycle
 
 `destroy()` is idempotent and releases the ticker callback, `ResizeObserver`, DPR listener, scene

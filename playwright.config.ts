@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4173
+// Parallel runs (or several worktrees) can pick their own port: E2E_PORT=4174 pnpm e2e
+const PORT = Number(process.env.E2E_PORT ?? 4173)
+const DIST = `dist-e2e-${PORT}`
 
 /**
  * Tests run against an optimised build made in `e2e` mode (window.__game test hook on) served by
@@ -40,7 +42,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm build:e2e && pnpm preview:e2e`,
+    command: `pnpm exec vite build --mode e2e --outDir ${DIST} && pnpm exec vite preview --outDir ${DIST} --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

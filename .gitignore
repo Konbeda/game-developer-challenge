@@ -25,3 +25,4 @@ playwright-report/
 dist-e2e/
 blob-report/
 .claude/
+dist-e2e-*/

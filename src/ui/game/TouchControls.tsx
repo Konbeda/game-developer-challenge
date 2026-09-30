@@ -212,7 +212,7 @@ interface TouchControlsProps {
 
 /**
  * On-screen controls: a steering stick on the left, weapons on the right. Drawn semi-transparent so
- * the arena stays readable; a control becomes more opaque while it is held. Multi-touch capable.
+ * the arena stays readable; a control becomes even more see-through while it is held. Multi-touch capable.
  */
 export const TouchControls = memo(function TouchControls({
   enabled,

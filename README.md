@@ -102,7 +102,7 @@ the left thumb uses a **steering stick** instead: the ship turns to the directio
 the stick is pushed (a light touch in the centre only steers), and the right thumb uses the weapon buttons.
 Movement and firing work at the same time: one hand on `WASD` keys and one on the arrows, or one thumb on
 the stick and one on the weapon buttons. The touch controls are semi-transparent so the arena stays
-readable, multi-touch capable, and appear on touch devices (or with `?touch=1`). Keys are captured only
+readable (and even more so while held, so the thumb does not hide the sea), multi-touch capable, and appear on touch devices (or with `?touch=1`). Keys are captured only
 while a match is on screen and no dialog is open. On phones use **landscape**; in portrait a rotate prompt is
 shown and the match pauses.
 

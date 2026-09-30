@@ -177,6 +177,29 @@ test.describe('Touch controls', () => {
     expect(touchWidth).toBeLessThan(solidWidth * 0.9)
   })
 
+  test('a held control becomes more see-through, and returns when released', async ({
+    app,
+    page,
+  }) => {
+    await app.open({ touch: true })
+    await startMatch(page)
+    const opacity = (id: string) =>
+      page.getByTestId(id).evaluate((el) => Number(getComputedStyle(el).opacity))
+
+    expect(await opacity('touch-fire-front')).toBeCloseTo(0.7, 1)
+    expect(await opacity('touch-stick')).toBeCloseTo(0.7, 1)
+
+    await touchPress(page, 'fireFront', 2)
+    await touchStickDown(page, 0, 1, 1)
+    await expect.poll(() => opacity('touch-fire-front')).toBeLessThan(0.5)
+    await expect.poll(() => opacity('touch-stick')).toBeLessThan(0.5)
+
+    await touchRelease(page, 'fireFront', 2)
+    await touchStickUp(page, 1)
+    await expect.poll(() => opacity('touch-fire-front')).toBeGreaterThan(0.65)
+    await expect.poll(() => opacity('touch-stick')).toBeGreaterThan(0.65)
+  })
+
   test('multi-touch: stick + front cannon at the same time, and release stops them', async ({
     app,
     page,

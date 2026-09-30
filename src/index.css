@@ -584,7 +584,7 @@ input {
 /* ---------- Touch controls ----------
    Sprites: Kenney "Mobile Controls" (CC0), copied to public/vendor/kenney-mobile-controls.
    Credit and license: THIRD_PARTY_LICENSES.md. Controls are semi-transparent so the arena stays
-   readable, and become more opaque while held. */
+   readable, and become even more see-through while held. */
 
 .touch-controls {
   --touch: clamp(2.9rem, 7.4cqw, 5.4rem);
@@ -607,7 +607,8 @@ input {
 
 .touch-ctl[data-active='true'],
 .touch-ctl[aria-pressed='true'] {
-  opacity: 0.95;
+  /* Held: even more see-through, so the thumb on top does not hide the sea underneath. */
+  opacity: 0.4;
 }
 
 .touch-ctl:disabled {

@@ -2,6 +2,7 @@ import { useAppStore } from '../../state/appStore.ts'
 import { useLastResultStore } from '../../state/lastResultStore.ts'
 import { usePlayerStore } from '../../state/playerStore.ts'
 import { ControlsList } from '../game/ControlsList.tsx'
+import { FullscreenToggle } from '../game/FullscreenToggle.tsx'
 import { SoundToggle } from '../game/SoundToggle.tsx'
 import { useMediaQuery } from '../lib/media.ts'
 import { END_REASON_LABELS, formatDuration, formatPlayed } from '../lib/format.ts'
@@ -101,7 +102,8 @@ export function MenuScreen() {
           </div>
         </div>
       </Panel>
-      <div className="absolute right-2 bottom-1.5">
+      <div className="absolute right-2 bottom-1.5 flex items-center gap-2">
+        <FullscreenToggle size="sm" />
         <SoundToggle size="sm" />
       </div>
       <div className="absolute bottom-1.5 left-2 rounded-chip bg-[rgba(8,16,30,0.72)]">

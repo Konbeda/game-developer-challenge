@@ -107,8 +107,10 @@ while a match is on screen and no dialog is open. On phones use **landscape**; i
 shown and the match pauses.
 
 Tapping **Play** on a phone also asks the browser for fullscreen and a landscape lock where it supports them
-(Chrome on Android does; iPhone Safari does not). On touch screens the HUD is smaller and see-through, so it
-covers less of the arena.
+(Chrome on Android does; iPhone Safari does not). There is a fullscreen button next to the sound button in the
+menu, and opening the page upright shows a "rotate your device" notice where tapping anywhere (or the
+**Switch to landscape** button) forces landscape, because browsers only allow that after a tap. On touch
+screens the HUD is smaller and see-through, so it covers less of the arena.
 
 The match also pauses automatically when the window loses focus or the tab is hidden; resuming needs an
 explicit click on **Resume** and never applies input held during the pause.

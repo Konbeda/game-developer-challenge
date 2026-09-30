@@ -22,3 +22,6 @@ dist/
 dist-ssr/
 test-results/
 playwright-report/
+dist-e2e/
+blob-report/
+.claude/

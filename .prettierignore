@@ -2,3 +2,8 @@ assets
 dist
 pnpm-lock.yaml
 README.md
+dist-e2e
+e2e/__screenshots__
+playwright-report
+test-results
+public/mockServiceWorker.js

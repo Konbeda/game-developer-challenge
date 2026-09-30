@@ -60,7 +60,15 @@ export interface SimSnapshot {
   score: number
   arena: { width: number; height: number }
   player: { x: number; y: number; angle: number; health: number; maxHealth: number }
-  enemies: { id: number; kind: EnemyKind; x: number; y: number; angle: number; health: number }[]
+  enemies: {
+    id: number
+    kind: EnemyKind
+    x: number
+    y: number
+    angle: number
+    health: number
+    maxHealth: number
+  }[]
   projectiles: { id: number; owner: 'player' | 'enemy'; x: number; y: number; angle: number }[]
   islands: { x: number; y: number; radius: number }[]
 }

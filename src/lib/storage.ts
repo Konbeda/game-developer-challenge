@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   player: 'pirate-battle:player',
   lastResult: 'pirate-battle:last-result',
   outbox: 'pirate-battle:outbox',
+  outboxSynced: 'pirate-battle:outbox-synced',
   mockDb: 'pirate-battle:mock-db',
   mockScenario: 'pirate-battle:mock-scenario',
   muted: 'pirate-battle:muted',

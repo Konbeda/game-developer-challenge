@@ -24,6 +24,10 @@ async function settle(page: import('@playwright/test').Page) {
     await document.fonts.ready
     // Every image the UI preloaded must be decoded before the frame is captured.
     await Promise.all([...document.images].map((img) => img.decode().catch(() => undefined)))
+    // The game draws on the next animation frame after a manual-clock advance: wait for it.
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    )
   })
 }
 

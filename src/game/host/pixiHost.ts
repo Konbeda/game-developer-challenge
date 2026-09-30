@@ -53,6 +53,7 @@ export class PixiGameHost implements GameHost {
   private seedOverride: number | null = null
   private timeWarned = false
   private destroyed = false
+  private renderQueued = false
 
   private readonly hudListeners = new Set<(hud: HudState) => void>()
   private readonly endListeners = new Set<(result: MatchResult, settings: MatchSettings) => void>()
@@ -154,7 +155,7 @@ export class PixiGameHost implements GameHost {
     audio.play('game_start', 0.7)
     this.renderSnapshot(this.sim.snapshot())
     this.emitHud(true)
-    this.app?.render()
+    this.requestRender()
   }
 
   pause(): void {
@@ -274,7 +275,7 @@ export class PixiGameHost implements GameHost {
     } else if (this.phase === 'ready') {
       scene.update(dtMs)
     }
-    if (render) this.app?.render()
+    if (render) this.requestRender()
   }
 
   /** Sailing loop follows the throttle; a warning cue plays once when 10 seconds remain. */
@@ -346,6 +347,20 @@ export class PixiGameHost implements GameHost {
     for (const listener of [...this.hudListeners]) listener(next)
   }
 
+  /**
+   * Draws at most once per display frame, and only when something changed. With the manual test clock
+   * a test may call advance() thousands of times in a row; drawing after each call would make
+   * software WebGL (CI runners, no GPU) spend minutes on frames nobody looks at.
+   */
+  private requestRender(): void {
+    if (this.renderQueued || this.destroyed || !this.app) return
+    this.renderQueued = true
+    requestAnimationFrame(() => {
+      this.renderQueued = false
+      if (!this.destroyed) this.app?.render()
+    })
+  }
+
   private layout(): void {
     const { app, container, world } = this
     if (!app || !container || !world) return
@@ -356,7 +371,7 @@ export class PixiGameHost implements GameHost {
     const scale = Math.min(width / ARENA.width, height / ARENA.height)
     world.scale.set(scale)
     world.position.set((width - ARENA.width * scale) / 2, (height - ARENA.height * scale) / 2)
-    if (this.clockMode === 'manual' || this.phase !== 'running') app.render()
+    if (this.clockMode === 'manual' || this.phase !== 'running') this.requestRender()
   }
 
   private applyResolution(): void {
@@ -397,7 +412,7 @@ export class PixiGameHost implements GameHost {
           this.advance(dt, false)
           left -= dt
         }
-        this.app?.render()
+        this.requestRender()
       },
       setSeed: (value) => {
         if (Number.isInteger(value) && value >= 0 && value <= 0xffff_ffff) this.seedOverride = value

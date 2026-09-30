@@ -5,6 +5,19 @@
     "react/rules-of-hooks": "error",
     "react/no-danger": "error",
     "no-eval": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["e2e/**"],
+      "rules": {
+        "react/rules-of-hooks": "off"
+      }
+    }
+  ]
 }

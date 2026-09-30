@@ -106,6 +106,10 @@ readable, multi-touch capable, and appear on touch devices (or with `?touch=1`).
 while a match is on screen and no dialog is open. On phones use **landscape**; in portrait a rotate prompt is
 shown and the match pauses.
 
+Tapping **Play** on a phone also asks the browser for fullscreen and a landscape lock where it supports them
+(Chrome on Android does; iPhone Safari does not). On touch screens the HUD is smaller and see-through, so it
+covers less of the arena.
+
 The match also pauses automatically when the window loses focus or the tab is hidden; resuming needs an
 explicit click on **Resume** and never applies input held during the pause.
 

@@ -1,7 +1,5 @@
 # Architecture
 
-> Work in progress. Sections are filled as each area lands; the contract sections below are already binding.
-
 ## Layers and ownership
 
 | Layer            | Path                                                             | Responsibility                                                                                 |
@@ -100,7 +98,109 @@ Builds made with `VITE_E2E=true` expose `window.__game` (`getSnapshot`, `getHud`
 for real; the hook only observes state and drives the clock. `?perf=1` (or the E2E build) enables the
 frame-time sampler behind `window.__perf`.
 
-## Sections still to write
+## Local persistence
 
-Local persistence, ranking/history integration and cache behaviour, pending-record recovery, balancing
-notes and known limitations.
+Everything persisted lives in `localStorage` under one namespace (`STORAGE_KEYS` in `src/lib/storage.ts`)
+and every read goes through `readStorage(key, schema, fallback)`: missing, unparsable, tampered or
+throwing storage all resolve to the fallback, so a hostile or corrupted value can never crash the app.
+
+| Key                           | Content                                                                          | Schema                     |
+| ----------------------------- | -------------------------------------------------------------------------------- | -------------------------- |
+| `pirate-battle:options`       | Session time and spawn interval                                                  | `matchConfigSchema`        |
+| `pirate-battle:player`        | `playerId` and display name                                                      | player schema (name regex) |
+| `pirate-battle:last-result`   | Last completed match (a full `MatchSubmission`)                                  | `matchSubmissionSchema`    |
+| `pirate-battle:outbox`        | Matches waiting for the server (max 100)                                         | `pendingOutboxSchema`      |
+| `pirate-battle:outbox-synced` | Recently confirmed records, so a finished match keeps its status after a refresh | outbox schema              |
+| `pirate-battle:mock-db`       | Confirmed records of the mocked API (max 500)                                    | mock DB schema             |
+| `pirate-battle:mock-scenario` | Selected network scenario                                                        | `scenarioIdSchema`         |
+| `pirate-battle:muted`         | Sound preference                                                                 | boolean                    |
+
+Reloading the page or leaving a match abandons it: nothing is written for a match that did not finish.
+
+## Ranking and history integration
+
+- **Contracts** (`src/contracts/api.ts`): typed paths, query and body schemas; the client parses every
+  response with the same schemas, so an invalid payload becomes a typed `ApiError` (kinds `network`,
+  `timeout`, `http`, `invalid_response`) and never reaches the UI.
+- **Axios** (`src/api/client.ts`): one instance, a configurable timeout (default 8 s, `?timeoutMs=`),
+  cancellation through the `AbortSignal` that TanStack Query provides.
+- **Queries** (`src/api/queries.ts`, `hooks.ts`): keys carry every parameter (config, page, page size,
+  player), so answers for different pages never share a cache entry. Retries use exponential backoff
+  (0.5 s doubling, capped at 5 s, 2 attempts) only for transient failures (network, timeout, 5xx, 408,
+  425, 429). `staleTime` is 5 s and queries refetch on mount, window focus and reconnect, so Ranking and
+  Match History are fresh whenever they are shown again. `placeholderData` keeps the previous page on
+  screen while the next one loads (with a non-blocking "Updating" indicator).
+- **Stale answers.** Requests are cancelled when their key is no longer observed, and a response can only
+  write to the cache entry of the key that asked for it, so a slow answer for page 2 cannot overwrite
+  page 5. Covered by the `out_of_order` and `variable_latency` scenarios in unit and E2E tests.
+- **After a match is confirmed** the outbox invalidates the ranking and history queries. It cancels
+  in-flight requests first: without that, TanStack Query would reuse an in-flight fetch that started
+  before the confirmation and hand back a snapshot without the new record.
+- **Ranking** compares only matches with the same `MatchConfig` (the UI passes the current options);
+  order is `compareRanking`: score desc, duration asc, `playedAt` asc, `matchId` asc, and `rank` is
+  computed over the whole filtered list, not the page.
+
+## Pending-record recovery (outbox)
+
+1. When a match ends the app builds a `MatchSubmission` (`matchId` from `crypto.randomUUID()`), stores it as
+   the last result and calls `enqueueMatch`. The entry is **persisted before the first send**.
+2. Sending is single-flight per `matchId` and always reuses that same id. `POST /api/matches` is idempotent:
+   201 for a new record, 200 with `duplicate: true` when it already exists (both mean success), 409 when the
+   id exists with a different payload.
+3. Failures keep the entry queued. Timeouts, connection errors, 5xx, 408, 425 and 429 retry automatically
+   after 2 s, 5 s, 15 s and 30 s; after that the entry waits for a manual Retry, the `online` event or
+   the next app start (`flushPending`). 4xx errors (including 409) are never retried automatically.
+4. Status exposed to the UI: `pending -> syncing -> synced | failed`, observed through
+   `useSyncExternalStore`; the Result screen and the menu's "Last match" card show it with a Retry button.
+5. A pending record never blocks playing again, and several can be queued at once. After a refresh the
+   persisted outbox is flushed on start.
+6. **Timeout after commit** (`submit_timeout_after_commit`): the mock stores the record and then does not
+   answer in time; the retry finds the id, answers `duplicate: true`, and exactly one record exists.
+
+## MSW mock layer
+
+Handlers, fixtures and the persisted database are shared by the browser worker (development, tests and the
+published build) and by `msw/node` in unit tests. The worker script is served as a static file
+(`/mockServiceWorker.js`), unhandled requests (`/assets/**`, fonts, the app) bypass it, and starting
+mocks can never block the app (`enableMocking` races a short timeout and never rejects).
+
+- **Fixtures** are generated from a fixed seed: 27 ranking entries for the default config (several pages)
+  and smaller sets for four other configs. `many_pages` adds 137 entries per config and a synthetic
+  35-record history. Every fixture obeys the plausibility rules of the API.
+- **Server-side checks** on POST: schema validation with strict objects, duration versus session length,
+  plausible score for the spawn interval (`maxPlausibleScore`), reserved `fx-` ids, a cap of 500 stored
+  records.
+- **Scenarios** (14, see the README table) are selected from the UI panel or `?scenario=`; latency,
+  variable-latency seed, client timeout and retries are controllable from the URL so tests are
+  reproducible.
+- **Reset** clears the mock database, the scenario, the outbox and the query cache. Options and the last
+  result are kept.
+
+## Balance decisions
+
+All numbers are in `src/config/gameplay.ts`. Defaults: player 100 HP, 220 px/s, 2.3 rad/s; front cannon
+20 damage every 350 ms; each broadside is 3 parallel shells every 1400 ms; Chaser 40 HP, 150 px/s, 25
+contact damage; Shooter 60 HP, 95 px/s, fires from 520 px (holds around 340 px) every 1800 ms for 10
+damage; at most 10 enemies alive; spawn points at least 480 px from the player; five islands leaving
+corridors of at least ~300 px. The spawn bag holds 3 Chasers and 2 Shooters, so both kinds show up within
+any five spawns. An idle player is sunk in roughly 16-22 s; a simple auto-aim bot scores 27-28 points in a
+90 s match with a 3 s interval.
+
+## Known limitations
+
+- **Trust.** The game is client-side by requirement; scores can be forged (see the threat model).
+- **Score ceiling.** The mock API caps a match at `floor(duration / spawnInterval)` points and the first
+  spawn happens after one interval, so 90 s / 3 s allows at most 29 (28-29 is what a good bot reaches).
+  Shorter spawn intervals raise the ceiling.
+- **Rendering.** Hardware acceleration is required for 60 FPS. With software WebGL the game runs at about
+  20 FPS (correctly, but with dropped frames); see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+- **Mobile.** Landscape only. Touch controls were exercised with synthetic pointer events and a
+  4x CPU-throttled emulation, not on a physical phone.
+- **Visual baselines** were generated on Windows with the bundled Chromium; CI on Linux skips the pixel
+  comparison because fonts render differently.
+- **Enemy pathing** avoids islands with a single-blocking-island look-ahead heuristic; a Chaser can graze an
+  island but never crosses it.
+- **Scenario state** is per browser tab until reload (a scenario change in one tab is not pushed to
+  another), and the outbox keeps at most 100 entries (oldest dropped).
+- **Console.** Chromium itself logs failed HTTP responses (503 in the outage scenarios) as console errors;
+  the app throws no unhandled errors in the planned flows.

@@ -78,8 +78,8 @@ Production answer (documented, not built): server-side replay of the determinist
 ## Phase 5 — Test and performance infrastructure
 
 - [x] Playwright config (desktop + mobile, HTML report, traces, isolation)
-- [ ] Specs for shell and network (README items 1, 2, 8, 10, 11, 12)
-- [ ] Profiling harness: FPS, p95 frame time, entities, 5-cycle memory check
+- [x] Specs for shell and network (README items 1, 2, 8, 9, 10, 11, 12)
+- [x] Profiling harness: FPS, p95 frame time, entities, 5-cycle memory check (docs/PERFORMANCE.md)
 
 ## Phase 6 — The game
 
@@ -88,10 +88,10 @@ Production answer (documented, not built): server-side replay of the determinist
 - [x] Chaser, Shooter, spawning
 - [x] Scoring, end conditions, restart
 - [x] Effects, ship deterioration, audio, HUD
-- [ ] Combat specs (README items 3–7, 9)
+- [x] Combat specs (README items 3–7) and visual baselines
 
 ## Phase 7 — Wrap-up
 
-- [ ] Balancing, final profiling report
-- [ ] `README.md` and `ARCHITECTURE.md` (English)
+- [x] Balancing notes, final profiling report
+- [x] `README.md` and `ARCHITECTURE.md` (English)
 - [ ] Final deploy, clean-checkout verification

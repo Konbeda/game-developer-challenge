@@ -27,7 +27,11 @@ export function ResultScreen() {
       <Panel className="w-[min(26rem,100%)] short:w-[min(36rem,100%)]" aria-label="Match result">
         <div className="skin-scroll flex min-h-0 flex-col items-center gap-3 overflow-y-auto px-1 text-center short:gap-1.5">
           <ScreenTitle testId="result-title" className="text-[1.75rem] short:text-[1.4rem]">
-            Battle complete
+            {shown
+              ? shown.endReason === 'time_up'
+                ? 'Time is up'
+                : 'Ship sunk'
+              : 'Battle complete'}
           </ScreenTitle>
 
           {shown ? (

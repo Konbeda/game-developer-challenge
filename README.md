@@ -65,6 +65,8 @@ pnpm e2e                                # desktop + mobile projects, HTML report
 pnpm exec playwright show-report        # open the report; traces of failures are kept in test-results/
 pnpm exec playwright test --update-snapshots   # regenerate visual baselines (e2e/__screenshots__)
 E2E_PORT=4174 pnpm e2e                  # use another port (parallel runs)
+E2E_GPU=1 pnpm e2e                      # run with installed Google Chrome on the real GPU (lighter on the CPU)
+E2E_WORKERS=1 pnpm e2e                  # fewer parallel browsers
 ```
 
 The E2E bundle is built with `--mode e2e` (see `.env.e2e`), which exposes the `window.__game` test hook

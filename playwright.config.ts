@@ -2,6 +2,10 @@ import { defineConfig, devices } from '@playwright/test'
 
 // Parallel runs (or several worktrees) can pick their own port: E2E_PORT=4174 pnpm e2e
 const PORT = Number(process.env.E2E_PORT ?? 4173)
+// E2E_GPU=1 runs the installed Google Chrome, which uses the real GPU (much lighter on the CPU than the
+// bundled headless Chromium, which renders WebGL in software). Leave it unset in CI and when updating
+// visual baselines: software rendering is the reproducible reference.
+const useGpu = process.env.E2E_GPU === '1'
 const DIST = `dist-e2e-${PORT}`
 
 /**
@@ -15,7 +19,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 2 : undefined,
+  // The preview server aborts navigations under heavy parallel load; a few workers stay reliable.
+  workers: process.env.E2E_WORKERS ? Number(process.env.E2E_WORKERS) : 3,
   reporter: [['html', { open: 'never' }], ['list']],
   expect: {
     timeout: 10_000,
@@ -27,6 +32,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'off',
     serviceWorkers: 'allow',
+    ...(useGpu ? { channel: 'chrome' as const } : {}),
   },
   projects: [
     {
@@ -46,5 +52,7 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    // Without this the build has no window.__game hook (the host only installs it when VITE_E2E is 'true').
+    env: { VITE_E2E: 'true' },
   },
 })

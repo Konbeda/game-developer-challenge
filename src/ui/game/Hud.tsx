@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { formatCountdown } from '../lib/format.ts'
 import { Icon, IconButton } from '../primitives/index.ts'
 import { useHud } from './hudStore.ts'
+import { SoundToggle } from './SoundToggle.tsx'
 
 const HealthBar = memo(function HealthBar() {
   const health = useHud((v) => v.health)
@@ -89,6 +90,10 @@ export const Hud = memo(function Hud({ onPause }: HudProps) {
       >
         <ScoreCounter />
         <TimeCounter />
+        <SoundToggle
+          className="hud-interactive"
+          style={{ '--round': 'calc(56 * var(--hud) * 1.05)' } as CSSProperties}
+        />
         <IconButton
           icon="pause"
           label="Pause"

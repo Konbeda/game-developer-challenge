@@ -2,6 +2,7 @@ import { useAppStore } from '../../state/appStore.ts'
 import { useLastResultStore } from '../../state/lastResultStore.ts'
 import { usePlayerStore } from '../../state/playerStore.ts'
 import { ControlsList } from '../game/ControlsList.tsx'
+import { SoundToggle } from '../game/SoundToggle.tsx'
 import { useMediaQuery } from '../lib/media.ts'
 import { END_REASON_LABELS, formatDuration, formatPlayed } from '../lib/format.ts'
 import { Button, LinkButton, Panel, Scene, ScreenTitle } from '../primitives/index.ts'
@@ -18,7 +19,7 @@ export function MenuScreen() {
 
   return (
     <Scene testId="screen-menu" screen="menu">
-      <Panel className="w-[min(47rem,100%)] short:w-[min(56rem,100%)]" aria-label="Main menu">
+      <Panel className="w-[min(50rem,100%)] short:w-[min(58rem,100%)]" aria-label="Main menu">
         <div className="skin-scroll flex min-h-0 flex-col items-center gap-3 overflow-y-auto px-1 short:gap-1.5">
           <ScreenTitle
             testId="menu-title"
@@ -32,7 +33,7 @@ export function MenuScreen() {
             />
           </ScreenTitle>
 
-          <div className="grid w-full gap-4 sm:grid-cols-[1fr_1.35fr] sm:items-start short:gap-3">
+          <div className="grid w-full gap-4 sm:grid-cols-[minmax(18rem,1fr)_1.25fr] sm:items-start short:gap-3">
             <div className="flex flex-col items-center gap-3 short:gap-2">
               <nav aria-label="Main" className="flex flex-col items-center gap-3 short:gap-2">
                 <p className="text-[0.7rem] font-bold tracking-[0.28em] text-cream uppercase">
@@ -64,7 +65,7 @@ export function MenuScreen() {
                 <p className="text-center text-xs text-cream short:hidden">
                   Navigate the islands. Survive the battle.
                 </p>
-                <div className="flex flex-wrap items-center justify-center gap-2">
+                <div className="flex flex-nowrap items-center justify-center gap-2">
                   <Button
                     variant="secondary"
                     size="sm"
@@ -94,6 +95,9 @@ export function MenuScreen() {
           </div>
         </div>
       </Panel>
+      <div className="absolute right-2 bottom-1.5">
+        <SoundToggle size="sm" />
+      </div>
       <div className="absolute bottom-1.5 left-2 rounded-chip bg-[rgba(8,16,30,0.72)]">
         <NetworkScenariosTrigger look="link" />
       </div>
@@ -159,7 +163,7 @@ function LastMatchCard() {
           <p className="text-xs text-muted">
             <time dateTime={submission.playedAt}>{formatPlayed(submission.playedAt)}</time>
           </p>
-          <SyncStatus matchId={submission.matchId} testId="last-match-sync" compact />
+          <SyncStatus matchId={submission.matchId} testId="last-match-sync" compact align="start" />
         </div>
       ) : (
         <p className="mt-1 text-sm text-muted" data-testid="last-match-empty">

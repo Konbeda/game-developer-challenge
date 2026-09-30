@@ -1,10 +1,13 @@
-import type { ButtonHTMLAttributes, Ref } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 import type { SkinIconName } from '../skin.ts'
 import { cx } from './cx.ts'
 import { Icon } from './Icon.tsx'
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
-  icon: SkinIconName
+  /** Sprite icon. Omit when passing a custom `glyph`. */
+  icon?: SkinIconName
+  /** Custom glyph (inline SVG) for icons the sprite sheet does not have. */
+  glyph?: ReactNode
   /** Accessible name. Required: the button has no visible text. */
   label: string
   size?: 'sm' | 'md' | 'lg'
@@ -16,6 +19,7 @@ export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonEle
 /** Round sprite button with an icon (steppers, pagination arrows, HUD pause, touch controls). */
 export function IconButton({
   icon,
+  glyph,
   label,
   size = 'md',
   pressed,
@@ -38,7 +42,7 @@ export function IconButton({
       )}
       {...rest}
     >
-      <Icon name={icon} />
+      {glyph ?? (icon ? <Icon name={icon} /> : null)}
     </button>
   )
 }

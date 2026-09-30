@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { SCENARIO_IDS, SCENARIO_LABELS } from '../../contracts/scenarios.ts'
 import type { ScenarioId } from '../../contracts/scenarios.ts'
-import { getScenario, resetMocks, setScenario } from '../../mocks/index.ts'
+import { resetMocks, setScenario, useScenario } from '../../mocks/index.ts'
 import { Button, Dialog, LinkButton } from '../primitives/index.ts'
 
 interface TriggerProps {
@@ -40,7 +40,7 @@ export function NetworkScenariosTrigger({ look = 'button' }: TriggerProps) {
  */
 function NetworkScenariosDialog({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient()
-  const [current, setCurrent] = useState<ScenarioId>(() => getScenario())
+  const current = useScenario()
   const [confirmingReset, setConfirmingReset] = useState(false)
   const [message, setMessage] = useState('')
   const confirmRef = useRef<HTMLButtonElement>(null)
@@ -51,14 +51,12 @@ function NetworkScenariosDialog({ onClose }: { onClose: () => void }) {
 
   const choose = (id: ScenarioId) => {
     setScenario(id)
-    setCurrent(getScenario())
     setMessage(`Scenario set to ${SCENARIO_LABELS[id]}.`)
     void queryClient.invalidateQueries()
   }
 
   const reset = () => {
     resetMocks()
-    setCurrent(getScenario())
     setConfirmingReset(false)
     setMessage('Mocks reset to the initial state.')
     void queryClient.invalidateQueries()

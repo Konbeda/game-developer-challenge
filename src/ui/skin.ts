@@ -140,25 +140,41 @@ export function skinCssVariables(v: SkinVariant): Record<string, string> {
   }
 }
 
-function preload(urls: string[]): void {
-  for (const src of urls) {
+/** Keeps decoded sprites referenced so the browser cache is not dropped between screens. */
+const preloaded: HTMLImageElement[] = []
+let ready: Promise<void> = Promise.resolve()
+
+function loadImage(src: string): Promise<void> {
+  return new Promise((resolve) => {
     const img = new Image()
-    img.decoding = 'async'
+    img.onload = () => resolve()
+    img.onerror = () => resolve() // a missing sprite must never block the UI
     img.src = src
-  }
+    preloaded.push(img)
+  })
 }
 
-/** Writes the sprite variables on <html> and warms the cache so hover/pressed states never flash. */
-export function applySkin(): void {
+/**
+ * Writes the sprite variables on <html> and starts loading every sprite so hover/pressed states
+ * never flash. Returns a promise that settles when they are all loaded (or failed).
+ */
+export function applySkin(): Promise<void> {
   const root = document.documentElement
   const v = variant()
   const vars = skinCssVariables(v)
   for (const [key, value] of Object.entries(vars)) root.style.setProperty(key, value)
   root.dataset['skin'] = v
-  preload([
+  const urls = [
     ...(Object.keys(UI_SPRITES) as UiSpriteName[]).map(uiUrl),
     ...(Object.keys(ICON_SPRITES) as SkinIconName[]).map(skinIconUrl),
     skinEmblemUrl(),
     `${ASSET_ROOT}/${SCENE}`,
-  ])
+  ]
+  ready = Promise.all(urls.map(loadImage)).then(() => undefined)
+  return ready
+}
+
+/** Resolves when the skin sprites are loaded, or after `timeoutMs` (slow network): never blocks for long. */
+export function whenSkinReady(timeoutMs = 4000): Promise<void> {
+  return Promise.race([ready, new Promise<void>((resolve) => setTimeout(resolve, timeoutMs))])
 }

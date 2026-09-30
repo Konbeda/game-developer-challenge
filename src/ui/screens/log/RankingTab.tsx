@@ -69,7 +69,7 @@ export function RankingTab() {
       paginationLabel="Ranking pages"
       errorTitle="Ranking unavailable"
       emptyTitle="No scores yet"
-      emptyMessage="Play a battle with these options to be the first on the board."
+      emptyMessage={`Nobody has set a score for ${config.sessionSeconds} second battles with a ${formatSeconds(config.spawnIntervalMs)} second spawn interval yet. Play one to be first on the board.`}
     >
       {(data, stale) => (
         <Table

@@ -255,6 +255,12 @@ input {
   cursor: not-allowed;
 }
 
+.skin-round > svg {
+  width: 52%;
+  height: 52%;
+  pointer-events: none;
+}
+
 .skin-round > img {
   width: 50%;
   height: 50%;

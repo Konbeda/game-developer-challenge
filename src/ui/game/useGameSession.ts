@@ -4,6 +4,7 @@ import type { GameHost } from '../../game/contracts.ts'
 import { createGameHost } from '../../game/host/index.ts'
 import { useOptionsStore } from '../../state/optionsStore.ts'
 import { createSeed } from '../../state/ids.ts'
+import { whenSkinReady } from '../skin.ts'
 import { completeMatch } from './completeMatch.ts'
 import { applyHud, createHudStore } from './hudStore.ts'
 import type { HudStore } from './hudStore.ts'
@@ -49,13 +50,16 @@ export function useGameSession(): GameSession {
 
     const mount = () => {
       setLoad({ status: 'loading', progress: 0 })
-      host
-        .mount(container, (ratio) => {
+      // The HUD sprites must be ready when the arena appears, so loading waits for both.
+      Promise.all([
+        host.mount(container, (ratio) => {
           if (alive)
             setLoad((state) =>
               state.status === 'loading' ? { status: 'loading', progress: ratio } : state,
             )
-        })
+        }),
+        whenSkinReady(),
+      ])
         .then(() => {
           if (!alive) return
           setLoad({ status: 'ready' })

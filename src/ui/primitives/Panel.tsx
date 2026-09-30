@@ -3,7 +3,6 @@ import { cx } from './cx.ts'
 
 interface PanelProps extends HTMLAttributes<HTMLElement> {
   children: ReactNode
-  /** Tailwind width classes; the panel is content-sized otherwise. */
   ref?: Ref<HTMLElement>
 }
 

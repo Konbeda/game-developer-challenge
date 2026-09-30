@@ -24,18 +24,17 @@ export function ResultScreen() {
 
   return (
     <Scene testId="screen-result" screen="result">
-      <Panel className="w-[min(26rem,100%)]" aria-label="Match result">
-        <div className="skin-scroll flex min-h-0 flex-col items-center gap-3 overflow-y-auto px-1 text-center">
-          <ScreenTitle testId="result-title" className="text-[1.75rem]">
+      <Panel className="w-[min(26rem,100%)] short:w-[min(36rem,100%)]" aria-label="Match result">
+        <div className="skin-scroll flex min-h-0 flex-col items-center gap-3 overflow-y-auto px-1 text-center short:gap-1.5">
+          <ScreenTitle testId="result-title" className="text-[1.75rem] short:text-[1.4rem]">
             Battle complete
           </ScreenTitle>
 
           {shown ? (
             <>
               <p
-                className="font-display text-[4.2rem] leading-none font-semibold text-gold-bright title-shadow"
+                className="font-display text-[4.2rem] leading-none font-semibold text-gold-bright title-shadow short:text-[2.6rem]"
                 data-testid="result-score"
-                aria-label={`Score: ${shown.score} points`}
               >
                 {shown.score}
               </p>
@@ -61,7 +60,7 @@ export function ResultScreen() {
             </p>
           )}
 
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 short:flex-row short:gap-3">
             <Button onClick={startMatch} data-testid="result-play-again">
               Play again
             </Button>

@@ -23,21 +23,31 @@ interface SyncStatusProps {
   testId: string
   /** Hides the long explanation (menu card). */
   compact?: boolean
+  align?: 'center' | 'start'
 }
 
 /** Record status of one finished match, with a Retry action while it is not confirmed. */
-export function SyncStatus({ matchId, testId, compact }: SyncStatusProps) {
+export function SyncStatus({ matchId, testId, compact, align = 'center' }: SyncStatusProps) {
   const submission = useMatchSubmission(matchId)
   if (!submission) return null
   const view = VIEW[submission.status]
   const canRetry = submission.status === 'failed' || submission.status === 'pending'
   return (
-    <div className="flex flex-col items-center gap-2" data-testid={`${testId}-wrap`}>
+    <div
+      className={
+        align === 'start' ? 'flex flex-col items-start gap-2' : 'flex flex-col items-center gap-2'
+      }
+      data-testid={`${testId}-wrap`}
+    >
       <div
         role="status"
         data-testid={testId}
         data-status={submission.status}
-        className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm"
+        className={
+          align === 'start'
+            ? 'flex flex-wrap items-center justify-start gap-x-2 gap-y-1 text-sm'
+            : 'flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm'
+        }
       >
         {submission.status === 'syncing' ? <Spinner small /> : null}
         <Badge tone={view.tone} testId={`${testId}-badge`}>

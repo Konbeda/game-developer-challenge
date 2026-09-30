@@ -1,0 +1,76 @@
+import { useAppStore } from '../../state/appStore.ts'
+import { useLastResultStore } from '../../state/lastResultStore.ts'
+import { END_REASON_LABELS, formatDuration } from '../lib/format.ts'
+import { Button, Panel, Scene, ScreenTitle } from '../primitives/index.ts'
+import { SyncStatus } from './SyncStatus.tsx'
+
+/** Shown right after a match ends. Play Again always uses the options that are current now. */
+export function ResultScreen() {
+  const startMatch = useAppStore((s) => s.startMatch)
+  const go = useAppStore((s) => s.go)
+  const submission = useLastResultStore((s) => s.submission)
+  const unrecorded = useLastResultStore((s) => s.unrecorded)
+
+  const shown = unrecorded
+    ? { ...unrecorded.result, matchId: null }
+    : submission
+      ? {
+          score: submission.score,
+          durationMs: submission.durationMs,
+          endReason: submission.endReason,
+          matchId: submission.matchId,
+        }
+      : null
+
+  return (
+    <Scene testId="screen-result" screen="result">
+      <Panel className="w-[min(26rem,100%)]" aria-label="Match result">
+        <div className="skin-scroll flex min-h-0 flex-col items-center gap-3 overflow-y-auto px-1 text-center">
+          <ScreenTitle testId="result-title" className="text-[1.75rem]">
+            Battle complete
+          </ScreenTitle>
+
+          {shown ? (
+            <>
+              <p
+                className="font-display text-[4.2rem] leading-none font-semibold text-gold-bright title-shadow"
+                data-testid="result-score"
+                aria-label={`Score: ${shown.score} points`}
+              >
+                {shown.score}
+              </p>
+              <p className="text-sm font-bold tracking-widest text-cream uppercase">
+                Points · <span data-testid="result-time">{formatDuration(shown.durationMs)}</span> ·{' '}
+                <span data-testid="result-reason">{END_REASON_LABELS[shown.endReason]}</span>
+              </p>
+              {shown.matchId ? (
+                <SyncStatus matchId={shown.matchId} testId="result-sync" />
+              ) : (
+                <p
+                  role="status"
+                  className="max-w-[34ch] text-sm text-danger"
+                  data-testid="result-unrecorded"
+                >
+                  This match could not be recorded because its data was rejected.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted" data-testid="result-missing">
+              No result to show yet.
+            </p>
+          )}
+
+          <div className="flex flex-col items-center gap-2">
+            <Button onClick={startMatch} data-testid="result-play-again">
+              Play again
+            </Button>
+            <Button onClick={() => go('menu')} data-testid="result-main-menu">
+              Main menu
+            </Button>
+          </div>
+        </div>
+      </Panel>
+    </Scene>
+  )
+}

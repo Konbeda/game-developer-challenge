@@ -1,7 +1,673 @@
 @import 'tailwindcss';
 
+/* Short landscape viewports (phones): `short:` utilities tighten the layout. */
+@custom-variant short (@media (max-height: 460px));
+
+/*
+ * Design tokens. Screens and primitives only use these (plus the sprite variables that
+ * src/ui/skin.ts writes on <html>), so a redesign is a change to this block and to skin.ts.
+ */
+@theme {
+  --font-display: 'Fredoka', 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif;
+  --font-sans: 'Nunito Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  --color-board: #1b2c46;
+  --color-board-deep: #0f1b2e;
+  --color-board-row: #13233b;
+  --color-cream: #ffe9b9;
+  --color-cream-dim: #e6d3a6;
+  --color-gold: #f6b93b;
+  --color-gold-bright: #ffd56b;
+  --color-wood: #b9651b;
+  --color-wood-dark: #6f3812;
+  --color-ink: #3a1f05;
+  --color-muted: #b7c5db;
+  --color-success: #b9e8a3;
+  --color-danger: #ffa393;
+  --color-scene: #2f86a3;
+
+  --radius-chip: 0.4rem;
+  --radius-field: 0.55rem;
+
+  --shadow-title: 0 0.12rem 0 rgba(0, 0, 0, 0.55), 0 0 0.6rem rgba(0, 0, 0, 0.35);
+}
+
+/* Everything is sized in rem; the root scales with the viewport (16px at 900x500, clamped). */
+html {
+  font-size: clamp(0.8125rem, min(1.78vw, 3.2vh), 1.25rem);
+  -webkit-text-size-adjust: 100%;
+}
+
 html,
 body,
 #root {
   height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #0b1a2b;
+  color: var(--color-cream);
+  font-family: var(--font-sans);
+  line-height: 1.35;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  isolation: isolate;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* Focus: white ring with a dark halo so it reads on wood, gold and water alike. */
+:focus-visible {
+  outline: 0.18rem solid #fff;
+  outline-offset: 0.12rem;
+  box-shadow: 0 0 0 0.3rem rgba(8, 16, 30, 0.75);
+}
+
+.title-shadow {
+  text-shadow: var(--shadow-title);
+}
+
+/* Programmatic focus targets (screen headings) never show a ring. */
+[tabindex='-1']:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+::selection {
+  background: rgba(246, 185, 59, 0.45);
+}
+
+/* ---------- Scene ---------- */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  overflow: hidden;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  background: var(--color-scene) var(--skin-scene, none) center / cover no-repeat;
+}
+
+/* ---------- Panel (wooden frame + chalkboard) ---------- */
+
+.skin-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 2.5rem 2.1rem;
+  border-image-source: var(--skin-panel);
+  border-image-slice: var(--skin-panel-slice);
+  border-image-width: 2.5rem 2rem;
+  border-image-repeat: stretch;
+  color: var(--color-cream);
+  filter: drop-shadow(0 0.5rem 0.9rem rgba(0, 0, 0, 0.35));
+}
+
+/* ---------- Buttons (horizontal 9-slice; caps keep their proportions) ---------- */
+
+.skin-btn {
+  --btn-h: 3.3rem;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: var(--btn-h);
+  min-width: calc(var(--btn-h) * 3.4);
+  padding: 0;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 0 calc(var(--btn-h) * 0.4);
+  padding-inline: calc(var(--btn-h) * 0.1);
+  border-image-slice: var(--skin-btn-slice);
+  border-image-width: 0 calc(var(--btn-h) * 0.5);
+  border-image-repeat: stretch;
+  background: none;
+  border-radius: calc(var(--btn-h) * 0.3);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: calc(var(--btn-h) * 0.36);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: filter 120ms ease;
+}
+
+.skin-btn--sm {
+  --btn-h: 2.6rem;
+  min-width: calc(var(--btn-h) * 3.2);
+}
+
+.skin-btn--lg {
+  --btn-h: 3.8rem;
+}
+
+.skin-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+.skin-btn--primary {
+  border-image-source: var(--skin-btn-primary);
+  color: var(--color-ink);
+  text-shadow: 0 0.05rem 0 rgba(255, 244, 205, 0.55);
+}
+
+.skin-btn--primary:hover:not(:disabled) {
+  border-image-source: var(--skin-btn-primary-hover);
+}
+
+.skin-btn--primary:active:not(:disabled),
+.skin-btn--primary[data-pressed='true'] {
+  border-image-source: var(--skin-btn-primary-pressed);
+  padding-top: 0.08rem;
+}
+
+.skin-btn--primary:disabled {
+  border-image-source: var(--skin-btn-primary-disabled);
+  color: #5b4a35;
+  text-shadow: none;
+  cursor: not-allowed;
+}
+
+.skin-btn--secondary {
+  border-image-source: var(--skin-btn-secondary);
+  color: var(--color-cream);
+  text-shadow: 0 0.06rem 0 rgba(0, 0, 0, 0.6);
+}
+
+.skin-btn--secondary:hover:not(:disabled) {
+  filter: brightness(1.25);
+}
+
+.skin-btn--secondary:active:not(:disabled),
+.skin-btn--secondary[data-pressed='true'] {
+  border-image-source: var(--skin-btn-secondary-pressed);
+  padding-top: 0.08rem;
+}
+
+.skin-btn--secondary:disabled {
+  opacity: 0.55;
+  filter: grayscale(0.6);
+  cursor: not-allowed;
+}
+
+/* ---------- Round buttons ---------- */
+
+.skin-round {
+  --round: 2.75rem;
+  position: relative;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--round);
+  height: var(--round);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--skin-round) center / 100% 100% no-repeat;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.skin-round--sm {
+  --round: 2.2rem;
+}
+
+.skin-round--lg {
+  --round: 3.6rem;
+}
+
+.skin-round:hover:not(:disabled) {
+  background-image: var(--skin-round-hover);
+}
+
+.skin-round:active:not(:disabled),
+.skin-round[data-pressed='true'] {
+  background-image: var(--skin-round-pressed);
+}
+
+.skin-round:disabled {
+  opacity: 0.4;
+  filter: grayscale(0.7);
+  cursor: not-allowed;
+}
+
+.skin-round > img {
+  width: 50%;
+  height: 50%;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* ---------- Fields ---------- */
+
+.skin-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+  border: 0.14rem solid var(--color-wood);
+  border-radius: var(--radius-field);
+  background: var(--color-board-deep);
+  color: var(--color-cream);
+  box-shadow: inset 0 0.15rem 0.35rem rgba(0, 0, 0, 0.45);
+}
+
+.skin-input::placeholder {
+  color: #8798b1;
+}
+
+.skin-input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+.skin-input--stepper {
+  width: 3.6rem;
+  padding: 0.3rem 0.2rem;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-cream);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+}
+
+.skin-input--stepper:hover,
+.skin-input--stepper:focus {
+  border-color: rgba(185, 101, 27, 0.7);
+  background: var(--color-board-deep);
+}
+
+.skin-input--stepper::-webkit-outer-spin-button,
+.skin-input--stepper::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+/* ---------- Data table ---------- */
+
+.skin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.skin-table caption {
+  caption-side: top;
+  padding: 0 0 0.35rem;
+  color: var(--color-cream-dim);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.skin-table th {
+  padding: 0.2rem 0.75rem;
+  color: var(--color-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.skin-table td,
+.skin-table tbody th {
+  padding: 0.5rem 0.75rem;
+  background: var(--color-board-row);
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.skin-table tbody th {
+  color: var(--color-gold-bright);
+  text-align: left;
+  font-size: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.skin-table tr > :first-child {
+  border-radius: 0.4rem 0 0 0.4rem;
+}
+
+.skin-table tr > :last-child {
+  border-radius: 0 0.4rem 0.4rem 0;
+}
+
+.skin-table thead tr > :first-child,
+.skin-table thead tr > :last-child {
+  border-radius: 0;
+}
+
+.skin-table--dense {
+  border-spacing: 0 0.15rem;
+  font-size: 0.78rem;
+}
+
+.skin-table--dense td,
+.skin-table--dense tbody th {
+  padding: 0.28rem 0.55rem;
+  font-weight: 600;
+}
+
+.skin-table--dense th {
+  padding: 0.1rem 0.55rem;
+}
+
+.skin-table tr[data-highlight='true'] td,
+.skin-table tr[data-highlight='true'] th {
+  background: rgba(157, 126, 52, 0.4);
+}
+
+.skin-table[data-stale='true'] tbody {
+  opacity: 0.6;
+}
+
+/* ---------- Spinner ---------- */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.skin-spinner {
+  display: inline-block;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0.22rem solid rgba(255, 233, 185, 0.25);
+  border-top-color: var(--color-gold-bright);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.skin-spinner--sm {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-width: 0.16rem;
+}
+
+@keyframes shimmer {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skin-skeleton {
+  border-radius: 0.4rem;
+  background: var(--color-board-row);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* ---------- Progress bar (asset loading) ---------- */
+
+.skin-progress {
+  width: 100%;
+  height: 0.9rem;
+  overflow: hidden;
+  border: 0.12rem solid var(--color-wood);
+  border-radius: 999px;
+  background: var(--color-board-deep);
+}
+
+.skin-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(#ffd56b, #d9931a);
+  transition: width 150ms ease-out;
+}
+
+/* ---------- Game stage (fixed 16:9, letterboxed, safe-area aware) ---------- */
+
+.game-viewport {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
+  background: #06101d;
+  container-type: size;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.game-stage {
+  position: relative;
+  width: min(100cqw, 177.7778cqh);
+  height: min(100cqh, 56.25cqw);
+  container-type: size;
+  overflow: hidden;
+  /* One HUD unit = 1px on a 900px wide stage, clamped for tiny and huge screens. */
+  --hud: clamp(0.6px, 0.1111cqw, 1.5px);
+  background: #2d7fa0 var(--skin-scene, none) center / cover no-repeat;
+}
+
+.game-canvas-host {
+  position: absolute;
+  inset: 0;
+}
+
+.game-canvas-host > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.hud-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hud-layer > * {
+  position: absolute;
+}
+
+.hud-interactive {
+  pointer-events: auto;
+}
+
+.hud-counter {
+  display: flex;
+  align-items: center;
+  gap: calc(8 * var(--hud));
+  box-sizing: border-box;
+  width: calc(160 * var(--hud) * 1.05);
+  height: calc(56 * var(--hud) * 1.05);
+  padding: 0 calc(18 * var(--hud)) 0 calc(20 * var(--hud));
+  background: var(--skin-counter) center / 100% 100% no-repeat;
+  font-family: var(--font-display);
+  font-size: calc(24 * var(--hud));
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-cream);
+  text-shadow: 0 calc(1.5 * var(--hud)) 0 rgba(0, 0, 0, 0.6);
+}
+
+.hud-counter > img {
+  width: calc(30 * var(--hud));
+  height: calc(30 * var(--hud));
+}
+
+.hud-health {
+  position: absolute;
+  width: calc(256 * var(--hud) * 1.05);
+  height: calc(48 * var(--hud) * 1.05);
+  background: var(--skin-health-frame) center / 100% 100% no-repeat;
+}
+
+.hud-health__fill {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  /* Clip to the fill rect of the sprite (x 30..226, y 15..35 of 256x48) scaled by --ratio. */
+  clip-path: inset(
+    31.25% calc(100% - (30 + 196 * var(--ratio)) / 256 * 100%) 27.0833% calc(30 / 256 * 100%)
+  );
+  transition: clip-path 120ms linear;
+}
+
+.hud-health__label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: calc(17 * var(--hud));
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  text-shadow:
+    0 calc(1.2 * var(--hud)) 0 rgba(0, 0, 0, 0.75),
+    0 0 calc(3 * var(--hud)) rgba(0, 0, 0, 0.6);
+}
+
+.touch-controls {
+  --touch: clamp(2.9rem, 7.4cqw, 5.4rem);
+}
+
+.touch-cluster {
+  bottom: 4cqh;
+  width: calc(3.36 * var(--touch));
+  height: calc(1.68 * var(--touch));
+  pointer-events: none;
+}
+
+.touch-cluster--left {
+  left: 2.4cqw;
+}
+
+.touch-cluster--right {
+  right: 2.4cqw;
+}
+
+.touch-cluster > .touch-btn {
+  --round: var(--touch);
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+/* ---------- Rotate overlay ---------- */
+
+@keyframes rotate-hint {
+  0%,
+  20% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
+.rotate-phone {
+  width: 3.4rem;
+  height: 5.6rem;
+  border: 0.3rem solid var(--color-cream);
+  border-radius: 0.7rem;
+  animation: rotate-hint 2.6s ease-in-out infinite;
+}
+
+/* ---------- Motion preferences ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skin-spinner {
+    animation: none;
+    border-top-color: var(--color-gold-bright);
+    border-right-color: var(--color-gold-bright);
+  }
+}
+
+/* ---------- Compact (short landscape) tuning ---------- */
+
+@media (max-height: 460px) {
+  .scene {
+    padding: max(0.4rem, env(safe-area-inset-top)) max(0.6rem, env(safe-area-inset-right))
+      max(0.4rem, env(safe-area-inset-bottom)) max(0.6rem, env(safe-area-inset-left));
+  }
+
+  .skin-panel {
+    border-width: 1.9rem 1.7rem;
+    border-image-width: 1.9rem 1.7rem;
+  }
+
+  .skin-btn {
+    --btn-h: 2.7rem;
+  }
+
+  .skin-btn--sm {
+    --btn-h: 2.3rem;
+  }
+
+  .skin-table {
+    border-spacing: 0 0.2rem;
+  }
+
+  .skin-table td,
+  .skin-table tbody th {
+    padding-block: 0.2rem;
+  }
+
+  .skin-table--dense td,
+  .skin-table--dense tbody th {
+    padding-block: 0.12rem;
+    white-space: nowrap;
+  }
+}
+
+/* Thin, themed scrollbars for the scrollable board regions. */
+.skin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-wood) transparent;
 }

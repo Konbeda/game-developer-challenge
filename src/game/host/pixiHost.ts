@@ -1,5 +1,6 @@
 import { Application, Container, Graphics, type Ticker } from 'pixi.js'
 import { DEFAULT_MATCH_CONFIG, type MatchResult } from '../../contracts/match.ts'
+import { audio } from '../audio/audio.ts'
 import { loadGameAssets } from '../assets/loader.ts'
 import {
   ARENA,
@@ -50,6 +51,7 @@ export class PixiGameHost implements GameHost {
   private pendingResult: MatchResult | null = null
   private notifyInMs = 0
   private seedOverride: number | null = null
+  private timeWarned = false
   private destroyed = false
 
   private readonly hudListeners = new Set<(hud: HudState) => void>()
@@ -143,6 +145,11 @@ export class PixiGameHost implements GameHost {
     this.pendingResult = null
     this.notifyInMs = 0
     this.phase = 'running'
+    this.timeWarned = false
+    audio.unlock()
+    audio.stopAll()
+    audio.startLoop('ocean_ambience_loop', 0.22)
+    audio.play('game_start', 0.7)
     this.renderSnapshot(this.sim.snapshot())
     this.emitHud(true)
     this.app?.render()
@@ -151,6 +158,8 @@ export class PixiGameHost implements GameHost {
   pause(): void {
     if (this.phase !== 'running') return
     this.phase = 'paused'
+    audio.stopAll()
+    audio.play('game_pause', 0.6)
     this.input = { ...EMPTY_INPUT }
     this.accumulatorMs = 0
     this.emitHud(true)
@@ -162,6 +171,8 @@ export class PixiGameHost implements GameHost {
     this.input = { ...EMPTY_INPUT }
     this.accumulatorMs = 0
     this.phase = 'running'
+    audio.startLoop('ocean_ambience_loop', 0.22)
+    audio.play('game_resume', 0.6)
     this.emitHud(true)
   }
 
@@ -201,6 +212,7 @@ export class PixiGameHost implements GameHost {
       this.app.ticker.remove(this.onTick)
       this.app.ticker.stop()
     }
+    audio.stopAll()
     this.scene?.destroy()
     this.scene = null
     this.world?.destroy({ children: true })
@@ -239,7 +251,9 @@ export class PixiGameHost implements GameHost {
       this.accumulatorMs += dtMs
       while (this.accumulatorMs >= FIXED_STEP_MS && this.phase === 'running') {
         this.sim.step(this.input)
-        scene.handleEvents(this.sim.drainEvents())
+        const events = this.sim.drainEvents()
+        scene.handleEvents(events)
+        audio.handleEvents(events)
         this.accumulatorMs -= FIXED_STEP_MS
         const result = this.sim.result()
         if (result) this.finish(result)
@@ -247,6 +261,7 @@ export class PixiGameHost implements GameHost {
       this.renderSnapshot(this.sim.snapshot())
       scene.update(dtMs)
       this.emitHud(false)
+      this.updateAmbience()
     } else if (this.phase === 'ended') {
       if (this.sim) this.renderSnapshot(this.sim.snapshot())
       scene.update(dtMs)
@@ -258,6 +273,17 @@ export class PixiGameHost implements GameHost {
       scene.update(dtMs)
     }
     if (render) this.app?.render()
+  }
+
+  /** Sailing loop follows the throttle; a warning cue plays once when 10 seconds remain. */
+  private updateAmbience(): void {
+    if (this.input.forward) audio.startLoop('ship_sailing_loop', 0.16)
+    else audio.stopLoop('ship_sailing_loop')
+    const seconds = this.settings?.config.sessionSeconds ?? 0
+    if (!this.timeWarned && seconds > 10 && this.hud.timeRemainingMs <= 10_000) {
+      this.timeWarned = true
+      audio.play('time_warning', 0.7)
+    }
   }
 
   private finish(result: MatchResult): void {

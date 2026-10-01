@@ -24,16 +24,60 @@ Dependency direction: `ui -> api, game/host -> game/sim -> contracts`. The simul
 - **Arena**: logical 1600x900 units; the renderer scales, the simulation never sees pixels.
 - **React sync**: React only receives `HudState`, emitted on change (never per frame).
 
-## Threat model
+## Threat model and anti-cheat
 
-The game is client-side by requirement, so the client is untrusted: memory editors, DevTools, request forging and `localStorage` edits can all alter scores. Mitigations that fit this scope:
+The game is client-side by requirement, so everything the browser holds is controlled by the player:
+memory editors, DevTools, extensions, forged requests and edited `localStorage` can all change what is
+sent. The goal is therefore twofold: keep untrusted input from breaking the app (built), and shape the
+data so a real backend could stop fake scores (the contract is ready; the backend is out of scope).
 
-- Every external input is validated by a Zod schema: player name (allowlist regex), options, query strings, `localStorage` reads (`readStorage`), MSW request bodies and API responses. Strict objects reject unknown keys, including `__proto__`.
-- The MSW handlers apply server-style sanity checks (duration vs. session, plausible score for the spawn interval, idempotent `matchId`).
-- `window.__game` (E2E instrumentation) exists only when built with `VITE_E2E=true`; the public build does not expose it.
-- No `dangerouslySetInnerHTML` and no `eval` (lint rules).
+### What an attacker can try, and what this project does
 
-What this does **not** prevent: a player forging a plausible score. In production the answer is server-side validation by replaying the deterministic simulation from `seed` plus an input log, with rate limiting and signed sessions. That backend is out of scope for this challenge.
+| Attack                                                            | In this project                                                                                                                                                          | Residual risk                                                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| Inject markup or script through the player name                   | Allowlist regex (letters, digits, space, `_`, `-`; 1-16 characters), React escapes text, no `dangerouslySetInnerHTML` or `eval` (lint rules)                             | None known                                                       |
+| Malformed or oversized payloads, unknown keys, `__proto__` tricks | Strict Zod schemas at every boundary: options, query strings, `localStorage` reads, request bodies and responses; hostile inputs are unit tested                         | None known                                                       |
+| Edit `localStorage` (options, outbox, last result, mock database) | Every read is validated and falls back to defaults; the outbox is capped at 100 entries and the mock database at 500 records                                             | A well-formed edit is accepted, but it only affects that browser |
+| Submit an impossible score or duration                            | The API checks score <= floor(duration / spawn interval), duration <= session length (+1 s tolerance), `time_up` only near the full session length, id/date/seed formats | A plausible score still passes                                   |
+| Replay or double-submit a match                                   | `matchId` is idempotent: same payload returns the existing record (200), a different payload with the same id is rejected (409); fixture ids are reserved                | None for duplicates                                              |
+| Forge a plausible score, or edit the simulation in memory         | Cannot be prevented in the client                                                                                                                                        | See hardening below                                              |
+| Use the test hook as a cheat API                                  | `window.__game` exists only in builds made with `VITE_E2E=true`; the public build does not expose it                                                                     | Anyone can still use DevTools                                    |
+| Bots and automation                                               | Not addressed                                                                                                                                                            | Needs server-side rate limits and behaviour checks               |
+
+### Production hardening (designed for, not built)
+
+1. **Server-issued match sessions.** When a match starts the server returns a signed, single-use,
+   short-lived token holding `matchId`, `seed` and `config`. The client no longer chooses its own seed or
+   id, and every submission must carry a valid token.
+2. **Server-side replay.** The client also sends the input log (the held buttons per fixed step, run-length
+   encoded). The server runs the same simulation (`src/game/sim` is pure TypeScript with no DOM, so it runs
+   on Node unchanged), recomputes score, duration and end reason, and rejects a mismatch. The score becomes
+   authoritative instead of reported. A three-minute match simulates in tens of milliseconds, so this is cheap.
+3. **Wall-clock checks.** The time between issuing the token and receiving the submission must be at least the
+   match duration and not absurdly longer, so a three-minute match cannot arrive five seconds after it started.
+4. **Rate limits and anomaly detection.** Limits per player and per IP, outlier scores, inhuman input rates
+   (more changes per second than a hand can make) and perfect accuracy are flagged for review.
+5. **Real identity.** Accounts instead of a client-chosen name and `playerId`, with the name sanitised again on
+   the server; ranking moderation and an audit log to remove entries.
+6. **Transport and page hardening.** HTTPS only, a Content-Security-Policy and the usual headers
+   (`X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors`), so injected scripts cannot run or exfiltrate.
+
+### Why the project is ready for it
+
+- The simulation is deterministic: fixed time step, seeded random numbers, no wall clock, and the same seed
+  plus the same inputs always give the same match (covered by tests). That is what makes replay validation
+  possible at all.
+- Every record already carries `seed`, `config` and `durationMs`, and the contract is shared by the app, the
+  mock API and the tests, so adding `token` and `inputLog` is an additive change.
+- The mock handlers already live behind a typed REST contract; moving them to a real service changes where
+  they run, not the shape of the data.
+
+### What client-side hardening can and cannot do
+
+Obfuscation, anti-debugging or hiding globals only slow down a determined cheater; they do not stop one,
+and they make the code harder to review. This project deliberately spends its effort where it matters:
+validating everything it receives, not trusting the client, and keeping the simulation replayable so the
+server can be the authority. Preventing a player from forging a plausible score needs that server.
 
 ## Simulation (`src/game/sim`)
 

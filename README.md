@@ -203,11 +203,26 @@ e2e/            Playwright specs and visual baselines
 docs/           Performance report and raw results
 ```
 
-## Security notes
+## Security and anti-cheat
 
-The game is client-side by requirement, so the client is untrusted. Every external input (name, options,
-query strings, `localStorage`, request bodies and responses) goes through a strict Zod schema. See the
-threat model in [ARCHITECTURE.md](ARCHITECTURE.md) for what is and is not prevented.
+The game is client-side by requirement, so the client is untrusted: DevTools, memory editors and forged
+requests can change what is sent. What the project does about it:
+
+- **Validation everywhere.** Every external input (player name, options, query strings, `localStorage`,
+  request bodies and responses) goes through a strict Zod schema. The name is an allowlist (letters, digits,
+  space, `_`, `-`), so markup cannot get in; there is no `eval` or `dangerouslySetInnerHTML` (lint rules).
+- **Server-style checks in the mock API.** A submitted match must have a plausible score for its duration and
+  spawn interval, a duration within the session length, valid ids and dates, and an idempotent `matchId`
+  (same payload returns the existing record, a conflicting one is rejected).
+- **No test hooks in production.** `window.__game` exists only in the E2E build.
+- **Built to be verified by a server.** The simulation is deterministic (fixed step, seeded random numbers) and
+  each record carries its `seed`, `config` and `duration`, so a real backend could replay a match and compute
+  the score itself.
+
+What it cannot do from the client is stop a player from submitting a *plausible* fake score. The plan for a
+real deployment (server-issued session tokens, replay of the input log on the server, wall-clock checks, rate
+limits, real identity and security headers) is described in the **Threat model and anti-cheat** section of
+[ARCHITECTURE.md](ARCHITECTURE.md), together with an attack-by-attack table of what is and is not covered.
 
 ## Deployment
 

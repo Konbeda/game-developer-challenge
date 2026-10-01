@@ -276,8 +276,11 @@ any five spawns. An idle player is sunk in roughly 16-22 s; a simple auto-aim bo
   Shorter spawn intervals raise the ceiling.
 - **Rendering.** Hardware acceleration is required for 60 FPS. With software WebGL the game runs at about
   20 FPS (correctly, but with dropped frames); see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
-- **Mobile.** Landscape only. Touch controls were exercised with synthetic pointer events and a
-  4x CPU-throttled emulation, not on a physical phone.
+- **Mobile.** Landscape only. Touch controls are covered by synthetic pointer events and a 4x
+  CPU-throttled emulation, and were also tried by hand on real phones. Fullscreen and the landscape lock
+  exist only where the browser offers them (Chrome on Android). iPhone Safari offers neither to web pages,
+  so the UI shows tips instead (Add to Home Screen via the web manifest, Portrait Orientation Lock); the
+  rotation itself cannot be forced there.
 - **Visual baselines** were generated on Windows with the bundled Chromium; CI on Linux skips the pixel
   comparison because fonts render differently.
 - **Enemy pathing** avoids islands with a single-blocking-island look-ahead heuristic; a Chaser can graze an

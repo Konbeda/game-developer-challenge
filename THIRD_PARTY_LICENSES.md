@@ -34,6 +34,10 @@ provider; they are not covered by this file.
 The speaker glyph of the sound toggle (`src/ui/game/SoundToggle.tsx`) is an original inline SVG drawn
 for this project, because the provided UI sheet has no sound icon.
 
+The fullscreen glyph and the home-screen icons (`public/apple-touch-icon.png`, `public/icon-192.png`,
+`public/icon-512.png`) are original: the icons are the challenge's player ship sprite drawn over a plain
+navy gradient.
+
 ## Touch control sprites
 
 The on-screen touch controls (steering stick, weapon buttons, pressed-state rings and their icons) use

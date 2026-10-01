@@ -95,3 +95,38 @@ test.describe('Fullscreen and landscape buttons (touch devices)', () => {
     expect(await calls(page)).toEqual([])
   })
 })
+
+// iPhone Safari: no Fullscreen API and no orientation lock, so the buttons give way to tips.
+test.describe('iPhone Safari (no Fullscreen API)', () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'desktop', 'the tips exist only for touch devices')
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'userAgent', {
+        value:
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+        configurable: true,
+      })
+      Object.defineProperty(document, 'fullscreenEnabled', { value: false, configurable: true })
+    })
+  })
+
+  test('the menu explains Add to Home Screen instead of showing a fullscreen button', async ({
+    app,
+    page,
+  }) => {
+    await app.open()
+    await expect(page.getByTestId('fullscreen-toggle')).toHaveCount(0)
+    await expect(page.getByTestId('ios-install-tip')).toContainText('Add to Home Screen')
+  })
+
+  test('the rotate notice explains the orientation lock and offers no switch button', async ({
+    app,
+    page,
+  }) => {
+    await app.open({ touch: true })
+    await page.setViewportSize({ width: 393, height: 851 })
+    await expect(page.getByTestId('rotate-overlay')).toBeVisible()
+    await expect(page.getByTestId('rotate-landscape')).toHaveCount(0)
+    await expect(page.getByTestId('ios-rotate-hint')).toContainText('Portrait Orientation Lock')
+  })
+})

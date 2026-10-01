@@ -3,6 +3,7 @@ import { useLastResultStore } from '../../state/lastResultStore.ts'
 import { usePlayerStore } from '../../state/playerStore.ts'
 import { ControlsList } from '../game/ControlsList.tsx'
 import { FullscreenToggle } from '../game/FullscreenToggle.tsx'
+import { IosInstallTip } from '../game/IosTips.tsx'
 import { SoundToggle } from '../game/SoundToggle.tsx'
 import { useMediaQuery } from '../lib/media.ts'
 import { END_REASON_LABELS, formatDuration, formatPlayed } from '../lib/format.ts'
@@ -98,6 +99,7 @@ export function MenuScreen() {
               {short ? null : <CaptainCard />}
               <LastMatchCard />
               <ControlsList />
+              <IosInstallTip />
             </div>
           </div>
         </div>

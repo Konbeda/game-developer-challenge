@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Button, pushModal } from './primitives/index.ts'
 import { canControlFullscreen, enterLandscapeFullscreen } from './lib/fullscreen.ts'
 import { usePortraitPhone } from './lib/media.ts'
+import { IosRotateHint } from './game/IosTips.tsx'
 
 /**
  * Full-screen "rotate your device" notice for phones held upright. It only covers and disables
@@ -50,6 +51,7 @@ export function RotateOverlay() {
             Switch to landscape
           </Button>
         ) : null}
+        <IosRotateHint />
       </div>
     </div>,
     document.body,

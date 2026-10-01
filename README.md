@@ -112,6 +112,13 @@ menu, and opening the page upright shows a "rotate your device" notice where tap
 **Switch to landscape** button) forces landscape, because browsers only allow that after a tap. On touch
 screens the HUD is smaller and see-through, so it covers less of the arena.
 
+**iPhone.** Safari gives web pages no Fullscreen API and no orientation lock, so those buttons are not shown
+there (a button that cannot work would be worse than none). Instead the menu explains how to get fullscreen
+(Share → **Add to Home Screen**; the page ships a web manifest and a touch icon, so it then opens without
+browser bars) and the rotate notice reminds to turn off *Portrait Orientation Lock* in Control Center. The
+phone still has to be turned by hand; the game pauses until it is. This is covered by an E2E test that
+emulates an iPhone user agent without the Fullscreen API.
+
 The match also pauses automatically when the window loses focus or the tab is hidden; resuming needs an
 explicit click on **Resume** and never applies input held during the pause.
 

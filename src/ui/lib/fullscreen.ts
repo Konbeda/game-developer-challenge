@@ -98,3 +98,35 @@ export function enterGameFullscreen(): void {
     // Fullscreen is an extra; the game works without it.
   }
 }
+
+/** True for iPhone/iPad/iPod, including iPadOS which reports itself as a Mac with a touch screen. */
+export function detectIos(userAgent: string, platform: string, maxTouchPoints: number): boolean {
+  if (/iPad|iPhone|iPod/.test(userAgent)) return true
+  return platform === 'MacIntel' && maxTouchPoints > 1
+}
+
+export function isIos(): boolean {
+  try {
+    return detectIos(navigator.userAgent, navigator.platform, navigator.maxTouchPoints)
+  } catch {
+    return false
+  }
+}
+
+/** Running as an installed web app (Home Screen shortcut): already fullscreen, no browser bars. */
+export function isStandalone(): boolean {
+  try {
+    const legacy = (navigator as Navigator & { standalone?: boolean }).standalone === true
+    return legacy || window.matchMedia('(display-mode: standalone)').matches
+  } catch {
+    return false
+  }
+}
+
+/**
+ * iPhone Safari lets pages neither enter fullscreen nor lock the orientation, so on iOS (outside an
+ * installed web app) the UI shows tips instead of buttons.
+ */
+export function needsIosTips(): boolean {
+  return isIos() && !isStandalone() && !canControlFullscreen()
+}

@@ -146,6 +146,21 @@ kind of device, and they can be used together:
 The simulation itself is unchanged by either. Held keys and steering are dropped on pause, resume, end of
 match and unmount.
 
+## Assets and third-party resources
+
+- **Challenge assets** (`assets/`) are served as they are (copied to the build by `vite-plugin-static-copy`)
+  and loaded through the manifest in `src/game/assets` (game textures) and `src/ui/skin.ts` (UI sprites).
+- **Kenney "Mobile Controls" (CC0 1.0)** is the one complementary graphic resource. Reason: the provided UI kit
+  has no analog stick or pressed-state rings, and the touch scheme (a heading-based stick plus weapon buttons,
+  see Input below) needs them to feel right on a phone. Only the used PNGs are bundled, unmodified, in
+  `public/vendor/kenney-mobile-controls/` with the pack's `License.txt`. They are referenced from CSS
+  (`src/index.css`, `.touch-*`), so there is no runtime dependency or code from the pack; the controls are
+  drawn at 70% opacity (40% while held) over the arena. The wooden theme of the challenge assets stays on
+  menus and HUD; the touch layer is deliberately neutral so it does not compete with the game.
+- **Fonts** are self-hosted through `@fontsource` (SIL OFL 1.1); the speaker and fullscreen glyphs are inline SVG.
+
+All sources and licenses are in `THIRD_PARTY_LICENSES.md`.
+
 ## Resource lifecycle
 
 `destroy()` is idempotent and releases the ticker callback, `ResizeObserver`, DPR listener, scene

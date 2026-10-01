@@ -41,6 +41,10 @@ sprites from **Mobile Controls (1.0)** by **Kenney** (https://kenney.nl/assets/m
 released under **Creative Commons Zero (CC0 1.0)**: https://creativecommons.org/publicdomain/zero/1.0/
 Attribution is not required; it is given here anyway.
 
+Why it is here: the challenge assets include round buttons and arrow icons but no analog stick or pressed-state
+rings, and the touch controls (a steering stick plus weapon buttons) are much easier to play on a phone with
+them. The challenge allows complementary resources when their sources and licenses are included.
+
 Only the files used by the game are bundled, in `public/vendor/kenney-mobile-controls/`
 (`style-a/`: pad, nub, circle button, direction buttons; `highlights-a/`: pressed rings; `icons/`:
 crosshair, fire, burst), together with the pack's own `License.txt`. The files are the pack's

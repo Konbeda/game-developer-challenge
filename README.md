@@ -187,6 +187,23 @@ Finished matches are queued in a persistent outbox first and are retried automat
 4. **Stale responses:** `out_of_order` and `variable_latency` while paging quickly: the table always ends
    up on the last selected page.
 
+## Assets and credits
+
+- **Provided by the challenge** (`assets/`): ships, tiles, effects, sounds, the menu and HUD UI kit and the
+  reference screens. They are the visual base of the game and of every menu.
+- **Complementary resource: Kenney "Mobile Controls" (CC0).** The provided UI kit has round buttons and arrow
+  icons but no analog stick and no pressed-state rings, which a phone needs. After playing on a real phone the
+  touch layout became a steering stick (one thumb steers) plus weapon buttons, and Kenney's CC0 pack
+  ([kenney.nl/assets/mobile-controls](https://kenney.nl/assets/mobile-controls)) fills that gap: stick pad and
+  knob, circle and direction buttons, held-state rings, crosshair and flame icons. The challenge allows
+  complementary resources when sources and licenses are included; only the files used are bundled (in
+  `public/vendor/kenney-mobile-controls/`, with the pack's own `License.txt`) and they are drawn
+  semi-transparent so the arena stays readable.
+- **Fonts:** Fredoka and Nunito Sans (SIL OFL 1.1), self-hosted. The speaker and fullscreen glyphs are original
+  inline SVG.
+
+Sources, licenses and bundled files are listed in [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
+
 ## Project layout
 
 ```
